@@ -1,0 +1,260 @@
+:root {
+  --bg-color: #f8f9fa;
+  --panel-bg: #ffffff;
+  --accent: #007bff;
+  --success: #28a745;
+  --danger: #dc3545;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+h1 { 
+  color: #343a40; 
+  font-size: 28px; 
+  margin: 0;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 20px;
+  max-width: 1800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.panel {
+  background: var(--panel-bg);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.panel h2 {
+  margin-top: 0;
+  font-size: 16px;
+  color: #495057;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 10px;
+}
+
+/* Editor de Código */
+#code-editor {
+  width: 100%;
+  height: 300px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  resize: vertical;
+  background: #f8f9fa;
+}
+
+/* Controles */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  border: 1px solid #ced4da;
+  background: #e9ecef;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  flex: 1;
+}
+
+button:hover:not(:disabled) {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+.btn-primary:hover:not(:disabled) { background: #0056b3; border-color: #0056b3; }
+
+.btn-success { background: var(--success); color: white; border-color: var(--success); }
+.btn-success:hover:not(:disabled) { background: #1e7e34; border-color: #1e7e34; }
+
+.btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
+.btn-danger:hover:not(:disabled) { background: #c82333; border-color: #c82333; }
+
+/* Estado */
+.status {
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+.status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+/* Registros y Memoria */
+.registers, .memory-view {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  font-family: 'Consolas', monospace;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.reg-item, .mem-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.reg-item.highlight, .mem-item.highlight {
+  background: #fff3cd;
+  border-color: #ffc107;
+  font-weight: bold;
+}
+
+.reg-name { color: #6c757d; font-weight: 600; }
+.reg-value { color: #495057; }
+
+/* Instrucciones */
+.instruction-list {
+  font-family: 'Consolas', monospace;
+  font-size: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.inst-item {
+  padding: 8px;
+  margin: 4px 0;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid transparent;
+  display: flex;
+  justify-content: space-between;
+}
+
+.inst-item.current {
+  background: #d4edda;
+  border-left-color: var(--success);
+  font-weight: bold;
+}
+
+/* SVG Datapath */
+.svg-wrap {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  overflow: auto;
+  border: 1px solid #e9ecef;
+}
+
+#circuitoMonociclo {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Cables */
+.cable {
+  fill: none;
+  stroke: #e0e0e0;
+  stroke-width: 3px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.3;
+  transition: all 0.3s;
+}
+
+.cable.on { 
+  opacity: 1; 
+  stroke-width: 4px; 
+}
+
+.cable.anim {
+  opacity: 1;
+  stroke-width: 5px;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+.wire-black { stroke: #343a40; }
+.wire-red { stroke: #dc3545; }
+.wire-green { stroke: #28a745; }
+.wire-blue { stroke: #007bff; }
+.wire-purple { stroke: #6f42c1; }
+.wire-orange { stroke: #fd7e14; }
+.wire-brown { stroke: #8B4513; }
+
+/* Componentes del procesador */
+.component {
+  transition: filter 0.3s;
+}
+
+.component.active {
+  filter: drop-shadow(0 0 8px #ffc107);
+}
+
+/* Speed control */
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.speed-control input {
+  flex: 1;
+}
+
+.speed-control span {
+  font-size: 12px;
+  color: #6c757d;
+  min-width: 80px;
+}
+
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+  
+  .registers {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

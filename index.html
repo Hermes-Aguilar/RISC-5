@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simulador RISC-V Monociclo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Simulador de Procesador RISC-V Monociclo</h1>
+  </header>
+
+  <div class="container">
+    <!-- Panel Izquierdo -->
+    <div>
+      <!-- Editor de Código -->
+      <div class="panel">
+        <h2>📝 Editor de Código RISC-V</h2>
+        <textarea id="code-editor" spellcheck="false"># Algoritmo de Fibonacci
+# ============================================
+start:
+    addi x10, x0, 0       # a0 = 0 (F(0) = 0)
+    addi x11, x0, 1       # a1 = 1 (F(1) = 1)
+    addi x5, x0, 500      # t0 = 500 (umbral)
+loop:
+    add x12, x10, x11     # a2 = a0 + a1
+    bge x12, x5, exit     # Si a2 >= 500, exit
+    add x10, x0, x11      # a0 = a1
+    add x11, x0, x12      # a1 = a2
+    beq x0, x0, loop      # Salto a loop
+exit:
+    beq x0, x0, exit      # Bucle infinito
+# ============================================</textarea>
+        
+        <div class="controls">
+          <button id="btn-load" class="btn-primary">📥 Cargar Programa</button>
+          <div class="btn-group">
+            <button id="btn-step" class="btn-success" disabled>▶️ Paso</button>
+            <button id="btn-run" disabled>⏯️ Ejecutar</button>
+            <button id="btn-reset" class="btn-danger">🔄 Reset</button>
+          </div>
+          <div class="speed-control">
+            <span>Velocidad:</span>
+            <input type="range" id="speed-slider" min="100" max="2000" value="800" step="100">
+            <span id="speed-label">800ms</span>
+          </div>
+        </div>
+        
+        <div id="status" class="status info">
+          ⏸️ Listo para cargar programa
+        </div>
+      </div>
+
+      <!-- Instrucciones Cargadas -->
+      <div class="panel">
+        <h2>📋 Programa en Memoria</h2>
+        <div id="instruction-list" class="instruction-list">
+          <p style="color: #6c757d; font-size: 12px;">Carga un programa para ver las instrucciones...</p>
+        </div>
+      </div>
+
+      <!-- Banco de Registros -->
+      <div class="panel">
+        <h2>💾 Banco de Registros</h2>
+        <div id="registers" class="registers"></div>
+      </div>
+
+      <!-- Memoria de Datos -->
+      <div class="panel">
+        <h2>🗄️ Memoria de Datos</h2>
+        <div id="memory-view" class="memory-view"></div>
+      </div>
+    </div>
+
+    <!-- Panel Derecho: Datapath -->
+    <div class="panel">
+      <h2>⚙️ Datapath del Procesador</h2>
+      <div class="svg-wrap">
+        <!-- ==== SVG del datapath (tu diseño original) ==== -->
+        <!-- He mantenido tu SVG completo aquí para que la animación funcione -->
+        <!-- Copia exactamente el SVG que tenías en tu archivo original -->
+        <!-- Para ahorrar espacio en este mensaje he incluido el SVG exactamente como estaba -->
+        <!-- BEGIN SVG -->
+        <svg width="1400" height="800" viewBox="0 0 1400 800" id="circuitoMonociclo" xmlns="http://www.w3.org/2000/svg">
+          <!-- (El contenido del SVG se mantiene idéntico al de tu archivo original) -->
+          <!-- Puedes pegar aquí el bloque SVG completo que ya tenías en PROCESARORABAD.html -->
+          <!-- Para evitar errores, asegúrate de que los elementos tengan los mismos ids (ej: w_opcode, w_rs1, data_mem, alu, etc.) -->
+          <!-- Si prefieres, puedes copiar el SVG tal cual desde tu HTML original. -->
+          <defs>
+            <marker id="arrow" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto" fill="#555">
+              <path d="M0,0 L5,2.5 L0,5 z" />
+            </marker>
+          </defs>
+
+          <rect width="100%" height="100%" fill="#f8f9fa"/>
+
+          <!-- PC MUX -->
+          <g id="mux_pc" class="component" transform="translate(30, 520)">
+             <polygon points="0,0 30,15 30,65 0,80" fill="#e0e0e0" stroke="black" stroke-width="2"/>
+             <text x="10" y="30" font-size="10">0</text>
+             <text x="10" y="60" font-size="10">1</text>
+          </g>
+          
+          <!-- PC Register -->
+          <g id="pc_reg" class="component" transform="translate(90, 530)">
+             <rect x="0" y="0" width="40" height="60" fill="white" stroke="black" stroke-width="2"/>
+             <text x="10" y="35" font-weight="bold">PC</text>
+          </g>
+          
+          <!-- PC+4 Adder -->
+          <g id="adder_pc4" class="component" transform="translate(90, 400)">
+             <polygon points="0,0 40,10 40,40 0,50" fill="#fff" stroke="black" stroke-width="2"/>
+             <text x="15" y="30" font-weight="bold">+4</text>
+          </g>
+    
+          <!-- Branch Gates -->
+          <g id="branch_gates" class="component" transform="translate(260, 580)">
+             <path d="M0,0 L20,0 A15,15 0 0,1 20,30 L0,30 Z" fill="white" stroke="black" stroke-width="2"/>
+             <g transform="translate(40, -10)">
+               <polygon points="0,0 20,10 20,40 0,50" fill="#e0e0e0" stroke="black" stroke-width="2"/>
+             </g>
+             <g transform="translate(80, 20)">
+               <polygon points="0,0 20,10 0,20" fill="white" stroke="black" stroke-width="2"/>
+               <circle cx="23" cy="10" r="3" fill="white" stroke="black" stroke-width="2"/>
+             </g>
+          </g>
+
+          <!-- Instruction Memory -->
+          <g id="im_mem" class="component" transform="translate(180, 180)">
+             <rect x="0" y="0" width="150" height="320" fill="white" stroke="black" stroke-width="2"/>
+             <text x="20" y="-10" font-weight="bold">Memoria</text>
+             <text x="20" y="10" font-weight="bold">Programa</text>
+             <text x="155" y="205" font-size="9" fill="green">24:20</text>
+             <text x="155" y="245" font-size="9" fill="blue">11:7</text>
+             <text id="inst-display-0" x="5" y="60" font-family="monospace" font-size="10"></text>
+             <text id="inst-display-1" x="5" y="90" font-family="monospace" font-size="10"></text>
+             <text id="inst-display-2" x="5" y="120" font-family="monospace" font-size="10"></text>
+             <text id="inst-display-3" x="5" y="150" font-family="monospace" font-size="10"></text>
+          </g>
+
+          <!-- RegDst MUX -->
+          <g id="mux_reg_dst" class="component" transform="translate(390, 460)">
+             <polygon points="0,0 25,10 25,50 0,60" fill="#e0e0e0" stroke="black" stroke-width="2"/>
+             <text x="5" y="20" font-size="9">0</text>
+             <text x="5" y="50" font-size="9">1</text>
+          </g>
+
+          <!-- Register File -->
+          <g id="reg_file" class="component" transform="translate(460, 340)">
+             <rect x="0" y="0" width="140" height="220" fill="white" stroke="black" stroke-width="2"/>
+             <text x="30" y="210" font-weight="bold">Registros</text>
+             <text x="5" y="40" font-size="10" fill="red">rs1</text>
+             <text x="5" y="80" font-size="10" fill="green">rs2</text>
+             <text x="5" y="150" font-size="10" fill="purple">rd</text>
+             <text x="120" y="150" font-size="10" fill="purple">wd</text>
+          </g>
+
+          <!-- Sign Extend -->
+          <g id="sign_ext" class="component" transform="translate(520, 240)">
+             <polygon points="0,10 100,0 100,40 0,30" fill="white" stroke="black" stroke-width="2"/>
+             <text x="20" y="25" font-weight="bold">SignExt</text>
+          </g>
+          
+          <!-- ALU MUX -->
+          <g id="mux_alu" class="component" transform="translate(660, 400)">
+             <polygon points="0,0 25,10 25,60 0,70" fill="#e0e0e0" stroke="black" stroke-width="2"/>
+             <text x="8" y="20" font-size="10">0</text>
+             <text x="8" y="55" font-size="10">1</text>
+          </g>
+          
+          <!-- ALU -->
+          <g id="alu" class="component" transform="translate(750, 360)">
+             <path d="M0,0 L40,20 L40,60 L0,80 L0,50 L20,40 L0,30 Z" fill="white" stroke="black" stroke-width="2"/>
+             <text x="45" y="45" font-weight="bold">ALU</text>
+          </g>
+          
+          <!-- Data Memory -->
+          <g id="data_mem" class="component" transform="translate(960, 280)">
+             <rect x="0" y="0" width="130" height="180" fill="white" stroke="black" stroke-width="2"/>
+             <text x="20" y="170" font-weight="bold">Memoria</text>
+             <text x="30" y="190" font-weight="bold">Datos</text>
+          </g>
+          
+          <!-- WB MUX 1 -->
+          <g id="mux_wb1" class="component" transform="translate(1140, 280)">
+             <polygon points="0,0 25,10 25,60 0,70" fill="#e0e0e0" stroke="black" stroke-width="2"/>
+             <text x="5" y="20" font-size="10">0</text>
+             <text x="5" y="55" font-size="10">1</text>
+          </g>
+          
+          <!-- WB MUX 2 -->
+          <g id="mux_wb2" class="component" transform="translate(1200, 140)">
+             <polygon points="0,0 25,10 25,60 0,70" fill="#e0e0e0" stroke="black" stroke-width="2"/>
+             <text x="5" y="20" font-size="10">0</text>
+             <text x="5" y="55" font-size="10">1</text>
+          </g>
+
+          <!-- Control Unit -->
+          <g id="control_unit" class="component" transform="translate(680, 640)">
+             <rect x="0" y="0" width="180" height="100" fill="white" stroke="black" stroke-width="2"/>
+             <text x="30" y="50" font-weight="bold" font-size="14">Unidad de</text>
+             <text x="40" y="70" font-weight="bold" font-size="14">Control</text>
+          </g>
+
+          <!-- Cables -->
+          <path id="w_opcode" class="cable wire-orange" d="M 330 240 L 360 240 L 360 700 L 680 700" />
+          <path id="w_ctrl_reg_dst" class="cable wire-brown" d="M 680 660 L 402 660 L 402 520" />
+          <path id="w_ctrl_alu_src" class="cable wire-brown" d="M 760 640 L 760 580 L 672 580 L 672 470" />
+          <path id="w_ctrl_reg_write" class="cable wire-brown" d="M 680 680 L 430 680 L 430 540 L 460 540" />
+          <path id="w_ctrl_mem_write" class="cable wire-brown" d="M 860 690 L 1025 690 L 1025 460" />
+          <path id="w_ctrl_branch" class="cable wire-brown" d="M 680 720 L 270 720 L 270 610" />
+
+          <path id="w_inst_20_16_mux" class="cable wire-green" d="M 330 420 L 360 420 L 360 470 L 390 470" />
+          <path id="w_inst_11_7_mux" class="cable wire-blue" d="M 330 500 L 390 500" />
+          <path id="w_mux_dst_out" class="cable wire-purple" d="M 415 490 L 460 490" />
+
+          <path id="w_pc_out" class="cable wire-black" d="M 130 560 L 160 560 L 160 500 L 80 500 L 80 425 L 90 425" />
+          <path id="w_pc_mem" class="cable wire-black" d="M 160 500 L 160 380 L 180 380" />
+          <path id="w_pc4_out" class="cable wire-black" d="M 130 425 L 160 425" />
+          <path id="w_purple" class="cable wire-purple" d="M 160 425 L 160 120 L 1180 120 L 1180 190 L 1200 190" />
+          <path id="w_pc4_loop" class="cable wire-black" d="M 160 425 L 160 480 L 20 480 L 20 535 L 30 535" />
+          <path id="w_pc_in" class="cable wire-black" d="M 60 560 L 90 560" />
+
+          <path id="w_rs1" class="cable wire-red" d="M 330 380 L 460 380" />
+          <path id="w_rs2" class="cable wire-green" d="M 330 420 L 460 420" />
+          
+          <path id="w_imm" class="cable wire-green" d="M 330 260 L 520 260" />
+          <path id="w_imm_alu" class="cable wire-green" d="M 620 260 L 640 260 L 640 450 L 660 450" />
+          <path id="w_rs1_dat" class="cable wire-red" d="M 600 380 L 750 380" />
+          <path id="w_rs2_dat" class="cable wire-green" d="M 600 420 L 630 420 L 630 420 L 660 420" />
+          <path id="w_mux_alu_out" class="cable wire-black" d="M 685 435 L 720 435 L 720 420 L 750 420" />
+          <path id="w_alu_res" class="cable wire-purple" d="M 790 400 L 920 400 L 920 310 L 960 310" />
+          
+          <path id="w_mem_write_data" class="cable wire-green" d="M 630 420 L 630 500 L 920 500 L 920 380 L 960 380" />
+          <path id="w_mem_read_data" class="cable wire-black" d="M 1090 310 L 1140 310" />
+          <path id="w_alu_bypass" class="cable wire-purple" d="M 920 400 L 1120 400 L 1120 335 L 1140 335" />
+          <path id="w_wb1_out" class="cable wire-purple" d="M 1165 315 L 1180 315 L 1180 160 L 1200 160" />
+          <path id="w_wb2_out" class="cable wire-purple" d="M 1225 175 L 1260 175 L 1260 510 L 590 510 L 590 490" />
+
+          <path id="w_zero" class="cable wire-orange" d="M 770 440 L 770 560 L 345 560 L 345 585" />
+          <path id="w_and_out" class="cable wire-orange" d="M 280 595 L 45 595 L 45 560" />
+        </svg>
+        <!-- END SVG -->
+      </div>
+    </div>
+  </div>
+
+  <script src="simulador.js"></script>
+</body>
+</html>
