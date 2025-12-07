@@ -1,4 +1,3 @@
-
 // ============================================
 // SIMULADOR RISC-V MONOCICLO
 // ============================================
@@ -231,6 +230,7 @@ class RISCVSimulator {
   }
 
   async step() {
+    await this.resetWires();
     // Verificar si ya terminó
     if (this.pc < 0 || this.pc >= this.instructions.length * 4) {
       this.setStatus('🏁 Programa finalizado', 'success');
@@ -268,10 +268,9 @@ class RISCVSimulator {
   }
 
   async executeInstruction(inst) {
-    await this.resetWires();
 
     // FETCH
-    await this.animateDatapath(['w_pc_out', 'w_pc_mem', 'w_pc4_out', 'w_purple']);
+    await this.animateDatapath(['w_pc_out', 'w_pc_mem', 'w_pc_to_adder', 'w_pc4_out', 'w_purple']);
     
     // DECODE
     await this.animate('w_opcode');
@@ -547,10 +546,8 @@ class RISCVSimulator {
       
       setTimeout(() => {
         el.classList.remove('anim');
-        el.classList.add('on');
-        el.style.strokeDasharray = '';
-        el.style.strokeDashoffset = '';
-        el.style.transition = '';
+        el.style.opacity = "1";
+        el.style.strokeWidth = "4px";
         resolve();
       }, this.speed * 0.6);
     });
@@ -567,9 +564,9 @@ class RISCVSimulator {
   async resetWires() {
     return new Promise(resolve => {
       document.querySelectorAll('.cable').forEach(c => {
-        c.classList.remove('on', 'anim');
-        c.style.strokeDasharray = '';
-        c.style.strokeDashoffset = '';
+        c.classList.remove('anim');
+        c.style.opacity = "0.3";
+        c.style.strokeWidth = "3px";
       });
       document.querySelectorAll('.component').forEach(c => {
         c.classList.remove('active');
@@ -591,7 +588,7 @@ class RISCVSimulator {
 
     while (this.running && this.pc >= 0 && this.pc < this.instructions.length * 4) {
       await this.step();
-      if (!this.running) break; // Si step() detectó fin, salir
+      if (!this.running) break;
       await new Promise(resolve => setTimeout(resolve, this.speed));
     }
 
@@ -620,7 +617,6 @@ class RISCVSimulator {
     document.querySelectorAll('.inst-item').forEach(i => i.classList.remove('current'));
     document.getElementById('btn-run').textContent = '⏯️ Ejecutar';
     
-    // Rehabilitar botones solo si hay instrucciones cargadas
     const hasInstructions = this.instructions.length > 0;
     document.getElementById('btn-step').disabled = !hasInstructions;
     document.getElementById('btn-run').disabled = !hasInstructions;
@@ -628,5 +624,6 @@ class RISCVSimulator {
     this.setStatus('🔄 Simulador reiniciado', 'info');
   }
 }
+
 // Inicializar simulador
 const sim = new RISCVSimulator();

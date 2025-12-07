@@ -77,16 +77,7 @@ exit:
     <div class="panel">
       <h2>⚙️ Datapath del Procesador</h2>
       <div class="svg-wrap">
-        <!-- ==== SVG del datapath (tu diseño original) ==== -->
-        <!-- He mantenido tu SVG completo aquí para que la animación funcione -->
-        <!-- Copia exactamente el SVG que tenías en tu archivo original -->
-        <!-- Para ahorrar espacio en este mensaje he incluido el SVG exactamente como estaba -->
-        <!-- BEGIN SVG -->
         <svg width="1400" height="800" viewBox="0 0 1400 800" id="circuitoMonociclo" xmlns="http://www.w3.org/2000/svg">
-          <!-- (El contenido del SVG se mantiene idéntico al de tu archivo original) -->
-          <!-- Puedes pegar aquí el bloque SVG completo que ya tenías en PROCESARORABAD.html -->
-          <!-- Para evitar errores, asegúrate de que los elementos tengan los mismos ids (ej: w_opcode, w_rs1, data_mem, alu, etc.) -->
-          <!-- Si prefieres, puedes copiar el SVG tal cual desde tu HTML original. -->
           <defs>
             <marker id="arrow" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto" fill="#555">
               <path d="M0,0 L5,2.5 L0,5 z" />
@@ -95,7 +86,7 @@ exit:
 
           <rect width="100%" height="100%" fill="#f8f9fa"/>
 
-          <!-- PC MUX -->
+          <!-- PC MUX (entrada para PC) -->
           <g id="mux_pc" class="component" transform="translate(30, 520)">
              <polygon points="0,0 30,15 30,65 0,80" fill="#e0e0e0" stroke="black" stroke-width="2"/>
              <text x="10" y="30" font-size="10">0</text>
@@ -114,7 +105,7 @@ exit:
              <text x="15" y="30" font-weight="bold">+4</text>
           </g>
     
-          <!-- Branch Gates -->
+          <!-- Branch Gates (AND + NOT) -->
           <g id="branch_gates" class="component" transform="translate(260, 580)">
              <path d="M0,0 L20,0 A15,15 0 0,1 20,30 L0,30 Z" fill="white" stroke="black" stroke-width="2"/>
              <g transform="translate(40, -10)">
@@ -129,17 +120,23 @@ exit:
           <!-- Instruction Memory -->
           <g id="im_mem" class="component" transform="translate(180, 180)">
              <rect x="0" y="0" width="150" height="320" fill="white" stroke="black" stroke-width="2"/>
-             <text x="20" y="-10" font-weight="bold">Memoria</text>
-             <text x="20" y="10" font-weight="bold">Programa</text>
-             <text x="155" y="205" font-size="9" fill="green">24:20</text>
-             <text x="155" y="245" font-size="9" fill="blue">11:7</text>
-             <text id="inst-display-0" x="5" y="60" font-family="monospace" font-size="10"></text>
-             <text id="inst-display-1" x="5" y="90" font-family="monospace" font-size="10"></text>
-             <text id="inst-display-2" x="5" y="120" font-family="monospace" font-size="10"></text>
-             <text id="inst-display-3" x="5" y="150" font-family="monospace" font-size="10"></text>
+             <text x="35" y="30" font-weight="bold">Memoria</text>
+             <text x="30" y="50" font-weight="bold">Programa</text>
+             <line x1="150" y1="200" x2="180" y2="200" stroke="green" stroke-width="2"/>
+             <text x="155" y="205" font-size="9" fill="green">rs2</text>
+             <line x1="150" y1="240" x2="180" y2="240" stroke="blue" stroke-width="2"/>
+             <text x="155" y="245" font-size="9" fill="blue">rd</text>
+             <line x1="150" y1="160" x2="180" y2="160" stroke="red" stroke-width="2"/>
+             <text x="155" y="165" font-size="9" fill="red">rs1</text>
+             <line x1="150" y1="80" x2="180" y2="80" stroke="orange" stroke-width="2"/>
+             <text x="155" y="85" font-size="9" fill="orange">op</text>
+             <text id="inst-display-0" x="5" y="100" font-family="monospace" font-size="10"></text>
+             <text id="inst-display-1" x="5" y="130" font-family="monospace" font-size="10"></text>
+             <text id="inst-display-2" x="5" y="160" font-family="monospace" font-size="10"></text>
+             <text id="inst-display-3" x="5" y="190" font-family="monospace" font-size="10"></text>
           </g>
 
-          <!-- RegDst MUX -->
+          <!-- RegDst MUX (selecciona rd entre rd e rs2) -->
           <g id="mux_reg_dst" class="component" transform="translate(390, 460)">
              <polygon points="0,0 25,10 25,50 0,60" fill="#e0e0e0" stroke="black" stroke-width="2"/>
              <text x="5" y="20" font-size="9">0</text>
@@ -150,10 +147,18 @@ exit:
           <g id="reg_file" class="component" transform="translate(460, 340)">
              <rect x="0" y="0" width="140" height="220" fill="white" stroke="black" stroke-width="2"/>
              <text x="30" y="210" font-weight="bold">Registros</text>
-             <text x="5" y="40" font-size="10" fill="red">rs1</text>
-             <text x="5" y="80" font-size="10" fill="green">rs2</text>
-             <text x="5" y="150" font-size="10" fill="purple">rd</text>
-             <text x="120" y="150" font-size="10" fill="purple">wd</text>
+             <line x1="0" y1="40" x2="-20" y2="40" stroke="red" stroke-width="2"/>
+             <text x="-55" y="45" font-size="10" fill="red">rs1</text>
+             <line x1="0" y1="80" x2="-20" y2="80" stroke="green" stroke-width="2"/>
+             <text x="-55" y="85" font-size="10" fill="green">rs2</text>
+             <line x1="0" y1="150" x2="-20" y2="150" stroke="purple" stroke-width="2"/>
+             <text x="-45" y="155" font-size="10" fill="purple">rd</text>
+             <line x1="0" y1="180" x2="-20" y2="180" stroke="purple" stroke-width="2"/>
+             <text x="-45" y="185" font-size="10" fill="purple">wd</text>
+             <line x1="140" y1="40" x2="160" y2="40" stroke="red" stroke-width="2"/>
+             <text x="165" y="45" font-size="10" fill="red">d1</text>
+             <line x1="140" y1="80" x2="160" y2="80" stroke="green" stroke-width="2"/>
+             <text x="165" y="85" font-size="10" fill="green">d2</text>
           </g>
 
           <!-- Sign Extend -->
@@ -162,7 +167,7 @@ exit:
              <text x="20" y="25" font-weight="bold">SignExt</text>
           </g>
           
-          <!-- ALU MUX -->
+          <!-- ALU MUX (selecciona segundo operando) -->
           <g id="mux_alu" class="component" transform="translate(660, 400)">
              <polygon points="0,0 25,10 25,60 0,70" fill="#e0e0e0" stroke="black" stroke-width="2"/>
              <text x="8" y="20" font-size="10">0</text>
@@ -173,23 +178,37 @@ exit:
           <g id="alu" class="component" transform="translate(750, 360)">
              <path d="M0,0 L40,20 L40,60 L0,80 L0,50 L20,40 L0,30 Z" fill="white" stroke="black" stroke-width="2"/>
              <text x="45" y="45" font-weight="bold">ALU</text>
+             <line x1="0" y1="20" x2="-20" y2="20" stroke="red" stroke-width="2"/>
+             <text x="-45" y="25" font-size="9" fill="red">A</text>
+             <line x1="0" y1="60" x2="-20" y2="60" stroke="black" stroke-width="2"/>
+             <text x="-45" y="65" font-size="9">B</text>
+             <line x1="40" y1="40" x2="60" y2="40" stroke="purple" stroke-width="2"/>
+             <text x="65" y="45" font-size="9" fill="purple">Res</text>
+             <line x1="20" y1="80" x2="20" y2="100" stroke="orange" stroke-width="2"/>
+             <text x="25" y="95" font-size="9" fill="orange">Z</text>
           </g>
           
           <!-- Data Memory -->
           <g id="data_mem" class="component" transform="translate(960, 280)">
              <rect x="0" y="0" width="130" height="180" fill="white" stroke="black" stroke-width="2"/>
-             <text x="20" y="170" font-weight="bold">Memoria</text>
-             <text x="30" y="190" font-weight="bold">Datos</text>
+             <text x="30" y="90" font-weight="bold">Memoria</text>
+             <text x="35" y="110" font-weight="bold">Datos</text>
+             <line x1="0" y1="30" x2="-20" y2="30" stroke="purple" stroke-width="2"/>
+             <text x="-60" y="35" font-size="9" fill="purple">Addr</text>
+             <line x1="0" y1="100" x2="-20" y2="100" stroke="green" stroke-width="2"/>
+             <text x="-50" y="105" font-size="9" fill="green">WD</text>
+             <line x1="130" y1="30" x2="150" y2="30" stroke="black" stroke-width="2"/>
+             <text x="155" y="35" font-size="9">RD</text>
           </g>
           
-          <!-- WB MUX 1 -->
+          <!-- WB MUX 1 (selecciona entre ALU result y Memory data) -->
           <g id="mux_wb1" class="component" transform="translate(1140, 280)">
              <polygon points="0,0 25,10 25,60 0,70" fill="#e0e0e0" stroke="black" stroke-width="2"/>
              <text x="5" y="20" font-size="10">0</text>
              <text x="5" y="55" font-size="10">1</text>
           </g>
           
-          <!-- WB MUX 2 -->
+          <!-- WB MUX 2 (selecciona entre resultado anterior y PC+4) -->
           <g id="mux_wb2" class="component" transform="translate(1200, 140)">
              <polygon points="0,0 25,10 25,60 0,70" fill="#e0e0e0" stroke="black" stroke-width="2"/>
              <text x="5" y="20" font-size="10">0</text>
@@ -203,45 +222,79 @@ exit:
              <text x="40" y="70" font-weight="bold" font-size="14">Control</text>
           </g>
 
-          <!-- Cables -->
-          <path id="w_opcode" class="cable wire-orange" d="M 330 240 L 360 240 L 360 700 L 680 700" />
-          <path id="w_ctrl_reg_dst" class="cable wire-brown" d="M 680 660 L 402 660 L 402 520" />
-          <path id="w_ctrl_alu_src" class="cable wire-brown" d="M 760 640 L 760 580 L 672 580 L 672 470" />
-          <path id="w_ctrl_reg_write" class="cable wire-brown" d="M 680 680 L 430 680 L 430 540 L 460 540" />
-          <path id="w_ctrl_mem_write" class="cable wire-brown" d="M 860 690 L 1025 690 L 1025 460" />
-          <path id="w_ctrl_branch" class="cable wire-brown" d="M 680 720 L 270 720 L 270 610" />
-
-          <path id="w_inst_20_16_mux" class="cable wire-green" d="M 330 420 L 360 420 L 360 470 L 390 470" />
-          <path id="w_inst_11_7_mux" class="cable wire-blue" d="M 330 500 L 390 500" />
-          <path id="w_mux_dst_out" class="cable wire-purple" d="M 415 490 L 460 490" />
-
-          <path id="w_pc_out" class="cable wire-black" d="M 130 560 L 160 560 L 160 500 L 80 500 L 80 425 L 90 425" />
-          <path id="w_pc_mem" class="cable wire-black" d="M 160 500 L 160 380 L 180 380" />
-          <path id="w_pc4_out" class="cable wire-black" d="M 130 425 L 160 425" />
-          <path id="w_purple" class="cable wire-purple" d="M 160 425 L 160 120 L 1180 120 L 1180 190 L 1200 190" />
-          <path id="w_pc4_loop" class="cable wire-black" d="M 160 425 L 160 480 L 20 480 L 20 535 L 30 535" />
-          <path id="w_pc_in" class="cable wire-black" d="M 60 560 L 90 560" />
-
-          <path id="w_rs1" class="cable wire-red" d="M 330 380 L 460 380" />
-          <path id="w_rs2" class="cable wire-green" d="M 330 420 L 460 420" />
+          <!-- ========== CABLES MEJORADOS - SIN PASAR POR ENCIMA DE MÓDULOS ========== -->
           
-          <path id="w_imm" class="cable wire-green" d="M 330 260 L 520 260" />
-          <path id="w_imm_alu" class="cable wire-green" d="M 620 260 L 640 260 L 640 450 L 660 450" />
-          <path id="w_rs1_dat" class="cable wire-red" d="M 600 380 L 750 380" />
-          <path id="w_rs2_dat" class="cable wire-green" d="M 600 420 L 630 420 L 630 420 L 660 420" />
-          <path id="w_mux_alu_out" class="cable wire-black" d="M 685 435 L 720 435 L 720 420 L 750 420" />
-          <path id="w_alu_res" class="cable wire-purple" d="M 790 400 L 920 400 L 920 310 L 960 310" />
+          <!-- De Instruction Memory a Control (opcode) -->
+          <path id="w_opcode" class="cable" d="M 330 260 L 350 260 L 350 700 L 680 700" />
           
-          <path id="w_mem_write_data" class="cable wire-green" d="M 630 420 L 630 500 L 920 500 L 920 380 L 960 380" />
-          <path id="w_mem_read_data" class="cable wire-black" d="M 1090 310 L 1140 310" />
-          <path id="w_alu_bypass" class="cable wire-purple" d="M 920 400 L 1120 400 L 1120 335 L 1140 335" />
-          <path id="w_wb1_out" class="cable wire-purple" d="M 1165 315 L 1180 315 L 1180 160 L 1200 160" />
-          <path id="w_wb2_out" class="cable wire-purple" d="M 1225 175 L 1260 175 L 1260 510 L 590 510 L 590 490" />
+          <!-- Señales de Control -->
+          <path id="w_ctrl_reg_dst" class="cable" d="M 680 660 L 405 660 L 405 540 L 405 520" />
+          <path id="w_ctrl_alu_src" class="cable" d="M 760 640 L 760 600 L 672 600 L 672 470" />
+          <path id="w_ctrl_reg_write" class="cable" d="M 700 640 L 700 620 L 450 620 L 450 565 L 450 540 L 460 540" />
+          <path id="w_ctrl_mem_write" class="cable" d="M 840 690 L 950 690 L 950 465 L 950 460" />
+          <path id="w_ctrl_branch" class="cable" d="M 680 720 L 270 720 L 270 610" />
 
-          <path id="w_zero" class="cable wire-orange" d="M 770 440 L 770 560 L 345 560 L 345 585" />
-          <path id="w_and_out" class="cable wire-orange" d="M 280 595 L 45 595 L 45 560" />
+          <!-- Instrucción rs2 a muxes -->
+          <path id="w_inst_20_16_mux" class="cable" d="M 330 420 L 355 420 L 355 470 L 390 470" />
+          <path id="w_inst_11_7_mux" class="cable" d="M 330 420 L 375 420 L 375 510 L 390 510" />
+          <path id="w_mux_dst_out" class="cable" d="M 415 490 L 440 490 L 440 490 L 460 490" />
+
+          <!-- PC a Memoria y sumador -->
+          <path id="w_pc_out" class="cable" d="M 130 560 L 160 560" />
+          <path id="w_pc_mem" class="cable" d="M 160 560 L 160 530 L 160 380 L 180 380" />
+          <path id="w_pc_to_adder" class="cable" d="M 160 560 L 160 530 L 160 500 L 80 500 L 80 425 L 90 425" />
+          
+          <!-- PC+4 -->
+          <path id="w_pc4_out" class="cable" d="M 130 425 L 160 425" />
+          <path id="w_purple" class="cable" d="M 160 425 L 160 330 L 160 120 L 1180 120 L 1180 190 L 1200 190" />
+          <path id="w_pc4_loop" class="cable" d="M 160 425 L 160 480 L 20 480 L 20 535 L 30 535" />
+          
+          <!-- Entrada al PC desde MUX -->
+          <path id="w_pc_in" class="cable" d="M 60 560 L 90 560" />
+
+          <!-- rs1 y rs2 desde Instruction Memory a Register File -->
+          <path id="w_rs1" class="cable" d="M 330 340 L 430 340 L 430 380 L 460 380" />
+          <path id="w_rs2" class="cable" d="M 330 380 L 420 380 L 420 420 L 460 420" />
+          
+          <!-- Inmediato desde Instruction Memory a Sign Extend -->
+          <path id="w_imm" class="cable" d="M 330 280 L 350 280 L 350 250 L 520 250" />
+          
+          <!-- Inmediato extendido desde Sign Extend al MUX de ALU -->
+          <path id="w_imm_alu" class="cable" d="M 620 250 L 650 250 L 650 330 L 650 450 L 660 450" />
+          
+          <!-- Datos desde Register File (salida d1) -->
+          <path id="w_rs1_dat" class="cable" d="M 620 380 L 730 380" />
+          
+          <!-- Datos desde Register File (salida d2) -->
+          <path id="w_rs2_dat" class="cable" d="M 620 420 L 630 420" />
+          
+          <!-- Salida de ALU MUX -->
+          <path id="w_mux_alu_out" class="cable" d="M 685 435 L 720 435 L 720 420 L 730 420" />
+          
+          <!-- Resultado de ALU a Memoria de Datos (dirección) -->
+          <path id="w_alu_res" class="cable" d="M 810 400 L 900 400 L 900 310 L 940 310 L 960 310" />
+          
+          <!-- Datos a escribir en memoria (desde d2) -->
+          <path id="w_mem_write_data" class="cable" d="M 630 420 L 630 575 L 900 575 L 900 380 L 940 380 L 960 380" />
+          
+          <!-- Datos leídos desde memoria -->
+          <path id="w_mem_read_data" class="cable" d="M 1110 310 L 1140 310" />
+          
+          <!-- Bypass de ALU a WB MUX 1 -->
+          <path id="w_alu_bypass" class="cable" d="M 900 400 L 900 335 L 1120 335 L 1140 335" />
+          
+          <!-- Salida de WB MUX 1 a WB MUX 2 -->
+          <path id="w_wb1_out" class="cable" d="M 1165 315 L 1180 315 L 1180 260 L 1180 160 L 1200 160" />
+          
+          <!-- Salida de WB MUX 2 de regreso a Register File -->
+          <path id="w_wb2_out" class="cable" d="M 1225 175 L 1280 175 L 1280 600 L 590 600 L 590 520 L 460 520" />
+
+          <!-- Zero flag desde ALU a branch gates -->
+          <path id="w_zero" class="cable" d="M 770 440 L 770 480 L 770 560 L 345 560 L 345 585" />
+          
+          <!-- Salida de AND gate a PC MUX -->
+          <path id="w_and_out" class="cable" d="M 280 595 L 250 595 L 45 595 L 45 565 L 45 560" />
         </svg>
-        <!-- END SVG -->
       </div>
     </div>
   </div>

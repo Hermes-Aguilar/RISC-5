@@ -192,35 +192,38 @@ button:disabled {
   height: auto;
 }
 
-/* Cables */
+/* Cables apagados → amarillo con puntitos; animación → azul; encendido → rojo */
 .cable {
   fill: none;
-  stroke: #e0e0e0;
+  stroke: #ffc107;     /* APAGADO = amarillo */
   stroke-width: 3px;
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: 0.3;
   transition: all 0.3s;
+  stroke-dasharray: 6 6; /* TODOS tienen puntitos por defecto */
 }
 
-.cable.on { 
-  opacity: 1; 
-  stroke-width: 4px; 
+.cable.on {
+  stroke: #dc3545 !important; /* ENCENDIDO = rojo */
+  opacity: 1 !important;
+  stroke-width: 4px !important;
+  stroke-dasharray: none !important;
+  filter: drop-shadow(0 0 6px rgba(220,53,69,0.6));
 }
 
 .cable.anim {
-  opacity: 1;
-  stroke-width: 5px;
-  filter: drop-shadow(0 0 4px currentColor);
+  stroke: #007bff !important; /* animación azul */
+  opacity: 1 !important;
+  stroke-width: 3.5px !important;
+  stroke-dasharray: 8 8;
+  animation: cable-blue-move 1s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(0,123,255,0.6));
 }
 
-.wire-black { stroke: #343a40; }
-.wire-red { stroke: #dc3545; }
-.wire-green { stroke: #28a745; }
-.wire-blue { stroke: #007bff; }
-.wire-purple { stroke: #6f42c1; }
-.wire-orange { stroke: #fd7e14; }
-.wire-brown { stroke: #8B4513; }
+@keyframes cable-blue-move {
+  to { stroke-dashoffset: -16; }
+}
 
 /* Componentes del procesador */
 .component {
