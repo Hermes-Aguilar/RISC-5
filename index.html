@@ -77,7 +77,7 @@ exit:
     <div class="panel">
       <h2>⚙️ Datapath del Procesador</h2>
       <div class="svg-wrap">
-        <svg width="1400" height="800" viewBox="0 0 1400 800" id="circuitoMonociclo" xmlns="http://www.w3.org/2000/svg">
+        <svg width="1600" height="700" viewBox="0 0 1600 700" id="circuitoMonociclo" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <marker id="arrow" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto" fill="#555">
               <path d="M0,0 L5,2.5 L0,5 z" />
@@ -86,214 +86,585 @@ exit:
 
           <rect width="100%" height="100%" fill="#f8f9fa"/>
 
-          <!-- PC MUX (entrada para PC) -->
-          <g id="mux_pc" class="component" transform="translate(30, 520)">
-             <polygon points="0,0 30,15 30,65 0,80" fill="#e0e0e0" stroke="black" stroke-width="2"/>
-             <text x="10" y="30" font-size="10">0</text>
-             <text x="10" y="60" font-size="10">1</text>
-          </g>
-          
           <!-- PC Register -->
-          <g id="pc_reg" class="component" transform="translate(90, 530)">
-             <rect x="0" y="0" width="40" height="60" fill="white" stroke="black" stroke-width="2"/>
-             <text x="10" y="35" font-weight="bold">PC</text>
-          </g>
-          
-          <!-- PC+4 Adder -->
-          <g id="adder_pc4" class="component" transform="translate(90, 400)">
-             <polygon points="0,0 40,10 40,40 0,50" fill="#fff" stroke="black" stroke-width="2"/>
-             <text x="15" y="30" font-weight="bold">+4</text>
-          </g>
-    
-          <!-- Branch Gates (AND + NOT) -->
-          <g id="branch_gates" class="component" transform="translate(260, 580)">
-             <path d="M0,0 L20,0 A15,15 0 0,1 20,30 L0,30 Z" fill="white" stroke="black" stroke-width="2"/>
-             <g transform="translate(40, -10)">
-               <polygon points="0,0 20,10 20,40 0,50" fill="#e0e0e0" stroke="black" stroke-width="2"/>
-             </g>
-             <g transform="translate(80, 20)">
-               <polygon points="0,0 20,10 0,20" fill="white" stroke="black" stroke-width="2"/>
-               <circle cx="23" cy="10" r="3" fill="white" stroke="black" stroke-width="2"/>
-             </g>
+          <g id="pc_reg" class="component" transform="translate(30, 280)">
+             <rect x="0" y="0" width="50" height="60" fill="white" stroke="black" stroke-width="2"/>
+             <text x="15" y="35" font-weight="bold">PC</text>
+             <!-- Entrada arriba -->
+             <line x1="-15" y1="30" x2="-1" y2="30" stroke="red" stroke-width="2"/>
+             <text x="-25" y="25" font-size="8" fill="red">1</text>
+             <!-- Salida derecha -->
+             <line x1="50" y1="30" x2="70" y2="30" stroke="red" stroke-width="2"/>
+             <text x="72" y="28" font-size="8" fill="black">2</text>
           </g>
 
-          <!-- Instruction Memory -->
-          <g id="im_mem" class="component" transform="translate(180, 180)">
-             <rect x="0" y="0" width="150" height="320" fill="white" stroke="black" stroke-width="2"/>
-             <text x="35" y="30" font-weight="bold">Memoria</text>
-             <text x="30" y="50" font-weight="bold">Programa</text>
-             <line x1="150" y1="200" x2="180" y2="200" stroke="green" stroke-width="2"/>
-             <text x="155" y="205" font-size="9" fill="green">rs2</text>
-             <line x1="150" y1="240" x2="180" y2="240" stroke="blue" stroke-width="2"/>
-             <text x="155" y="245" font-size="9" fill="blue">rd</text>
-             <line x1="150" y1="160" x2="180" y2="160" stroke="red" stroke-width="2"/>
-             <text x="155" y="165" font-size="9" fill="red">rs1</text>
-             <line x1="150" y1="80" x2="180" y2="80" stroke="orange" stroke-width="2"/>
-             <text x="155" y="85" font-size="9" fill="orange">op</text>
-             <text id="inst-display-0" x="5" y="100" font-family="monospace" font-size="10"></text>
-             <text id="inst-display-1" x="5" y="130" font-family="monospace" font-size="10"></text>
-             <text id="inst-display-2" x="5" y="160" font-family="monospace" font-size="10"></text>
-             <text id="inst-display-3" x="5" y="190" font-family="monospace" font-size="10"></text>
+          <!-- Sumador PC+4 (estilo trapecio con entradas arriba) -->
+          <g id="adder_pc4" class="component" transform="translate(120, 480)">
+             <!-- Línea entrada izquierda -->
+             <line x1="10" y1="0" x2="10" y2="15" stroke="red" stroke-width="2"/>
+             <text x="5" y="-3" font-size="8" fill="red">3</text>
+             <!-- Línea entrada derecha -->
+             <line x1="40" y1="0" x2="40" y2="15" stroke="red" stroke-width="2"/>
+             <text x="42" y="-3" font-size="8" fill="red">4</text>
+             <!-- Trapecio -->
+             <polygon points="5,15 45,15 50,45 0,45" fill="#fff" stroke="black" stroke-width="2"/>
+             <!-- Símbolo + -->
+             <text x="18" y="35" font-weight="bold" font-size="16">+</text>
+             <!-- Línea salida abajo -->
+             <line x1="25" y1="45" x2="25" y2="60" stroke="black" stroke-width="2"/>
+             <text x="28" y="70" font-size="8" fill="black">5</text>
           </g>
 
-          <!-- RegDst MUX (selecciona rd entre rd e rs2) -->
-          <g id="mux_reg_dst" class="component" transform="translate(390, 460)">
-             <polygon points="0,0 25,10 25,50 0,60" fill="#e0e0e0" stroke="black" stroke-width="2"/>
-             <text x="5" y="20" font-size="9">0</text>
-             <text x="5" y="50" font-size="9">1</text>
+          <!-- MUX 1 - entrada al PC (un poco más a la derecha) - mirando hacia abajo -->
+          <g id="mux_pc" class="component" transform="translate(135, 390)">
+             <polygon points="0,0 50,0 42,25 8,25" fill="#e0e0e0" stroke="black" stroke-width="2"/>
+             <text x="5" y="12" font-size="9">0</text>
+             <text x="38" y="12" font-size="9">1</text>
+             <!-- Número 4 un poco a la izquierda -->
+             <text x="0" y="-5" font-size="10">4</text>
+             <!-- Entrada izquierda (0) -->
+             <line x1="8" y1="-10" x2="8" y2="0" stroke="red" stroke-width="2"/>
+             <text x="3" y="-13" font-size="8" fill="red">6</text>
+             <!-- Entrada derecha (1) -->
+             <line x1="42" y1="-10" x2="42" y2="0" stroke="red" stroke-width="2"/>
+             <text x="44" y="-13" font-size="8" fill="red">7</text>
+             <!-- Salida abajo -->
+             <line x1="25" y1="25" x2="25" y2="40" stroke="red" stroke-width="2"/>
+             <text x="28" y="50" font-size="8" fill="black">8</text>
+             <!-- Entrada de control (selector) - lado derecho -->
+             <line x1="48" y1="12.5" x2="60" y2="12.5" stroke="red" stroke-width="2"/>
+             <text x="62" y="15" font-size="8" fill="red">9</text>
           </g>
 
-          <!-- Register File -->
-          <g id="reg_file" class="component" transform="translate(460, 340)">
-             <rect x="0" y="0" width="140" height="220" fill="white" stroke="black" stroke-width="2"/>
-             <text x="30" y="210" font-weight="bold">Registros</text>
-             <line x1="0" y1="40" x2="-20" y2="40" stroke="red" stroke-width="2"/>
-             <text x="-55" y="45" font-size="10" fill="red">rs1</text>
-             <line x1="0" y1="80" x2="-20" y2="80" stroke="green" stroke-width="2"/>
-             <text x="-55" y="85" font-size="10" fill="green">rs2</text>
-             <line x1="0" y1="150" x2="-20" y2="150" stroke="purple" stroke-width="2"/>
-             <text x="-45" y="155" font-size="10" fill="purple">rd</text>
-             <line x1="0" y1="180" x2="-20" y2="180" stroke="purple" stroke-width="2"/>
-             <text x="-45" y="185" font-size="10" fill="purple">wd</text>
-             <line x1="140" y1="40" x2="160" y2="40" stroke="red" stroke-width="2"/>
-             <text x="165" y="45" font-size="10" fill="red">d1</text>
-             <line x1="140" y1="80" x2="160" y2="80" stroke="green" stroke-width="2"/>
-             <text x="165" y="85" font-size="10" fill="green">d2</text>
-          </g>
-
-          <!-- Sign Extend -->
-          <g id="sign_ext" class="component" transform="translate(520, 240)">
-             <polygon points="0,10 100,0 100,40 0,30" fill="white" stroke="black" stroke-width="2"/>
-             <text x="20" y="25" font-weight="bold">SignExt</text>
-          </g>
-          
-          <!-- ALU MUX (selecciona segundo operando) -->
-          <g id="mux_alu" class="component" transform="translate(660, 400)">
-             <polygon points="0,0 25,10 25,60 0,70" fill="#e0e0e0" stroke="black" stroke-width="2"/>
-             <text x="8" y="20" font-size="10">0</text>
-             <text x="8" y="55" font-size="10">1</text>
-          </g>
-          
-          <!-- ALU -->
-          <g id="alu" class="component" transform="translate(750, 360)">
-             <path d="M0,0 L40,20 L40,60 L0,80 L0,50 L20,40 L0,30 Z" fill="white" stroke="black" stroke-width="2"/>
-             <text x="45" y="45" font-weight="bold">ALU</text>
+          <!-- Order & Sign Extend (un poco a la izquierda) -->
+          <g id="order_sign_ext" class="component" transform="translate(280, 350)">
+             <rect x="0" y="0" width="100" height="40" fill="white" stroke="black" stroke-width="2"/>
+             <text x="5" y="15" font-weight="bold" font-size="10">Orden &</text>
+             <text x="5" y="30" font-weight="bold" font-size="10">Sign Extend</text>
+             <!-- Entrada derecha superior -->
+             <line x1="100" y1="12" x2="120" y2="12" stroke="red" stroke-width="2"/>
+             <text x="122" y="14" font-size="8" fill="red">10</text>
+             <!-- Entrada derecha inferior -->
+             <line x1="100" y1="28" x2="120" y2="28" stroke="red" stroke-width="2"/>
+             <text x="122" y="30" font-size="8" fill="red">11</text>
+             <!-- Salida izquierda -->
              <line x1="0" y1="20" x2="-20" y2="20" stroke="red" stroke-width="2"/>
-             <text x="-45" y="25" font-size="9" fill="red">A</text>
+             <text x="-35" y="22" font-size="8" fill="black">12</text>
+          </g>
+
+          <!-- AND Gate - más a la derecha, mirando hacia la izquierda -->
+          <g id="and_gate" class="component" transform="translate(280, 530)">
+             <path d="M30,0 L30,40 A20,20 0 0,1 0,20 A20,20 0 0,1 30,0" fill="white" stroke="black" stroke-width="2"/>
+             <!-- Entrada superior -->
+             <line x1="30" y1="10" x2="50" y2="10" stroke="red" stroke-width="2"/>
+             <text x="52" y="12" font-size="8" fill="red">13</text>
+             <!-- Entrada inferior -->
+             <line x1="30" y1="30" x2="50" y2="30" stroke="red" stroke-width="2"/>
+             <text x="52" y="32" font-size="8" fill="red">14</text>
+             <!-- Salida izquierda -->
+             <line x1="0" y1="20" x2="-20" y2="20" stroke="red" stroke-width="2"/>
+             <text x="-35" y="22" font-size="8" fill="black">15</text>
+          </g>
+
+          <!-- MUX nuevo - entre AND y NOT, más grande, mirando hacia la izquierda -->
+          <g id="mux_branch" class="component" transform="translate(370, 525)">
+             <polygon points="30,0 15,10 15,50 30,60" fill="#e0e0e0" stroke="black" stroke-width="2"/>
+             <text x="19" y="22" font-size="9">0</text>
+             <text x="19" y="48" font-size="9">1</text>
+             <!-- Entrada superior (0) -->
+             <line x1="30" y1="15" x2="50" y2="15" stroke="red" stroke-width="2"/>
+             <text x="52" y="17" font-size="8" fill="red">16</text>
+             <!-- Entrada inferior (1) -->
+             <line x1="30" y1="45" x2="50" y2="45" stroke="red" stroke-width="2"/>
+             <text x="52" y="47" font-size="8" fill="red">17</text>
+             <!-- Salida izquierda -->
+             <line x1="15" y1="30" x2="-5" y2="30" stroke="red" stroke-width="2"/>
+             <text x="-20" y="32" font-size="8" fill="black">18</text>
+             <!-- Entrada de control (selector) -->
+             <line x1="22.5" y1="58" x2="22.5" y2="75" stroke="red" stroke-width="2"/>
+             <text x="25" y="85" font-size="8" fill="red">19</text>
+          </g>
+
+          <!-- NOT Gate - más a la derecha con más espacio -->
+          <g id="not_gate" class="component" transform="translate(470, 545)">
+             <polygon points="0,10 20,0 20,20 0,10" fill="white" stroke="black" stroke-width="2"/>
+             <circle cx="22" cy="10" r="3" fill="white" stroke="black" stroke-width="2"/>
+             <!-- Entrada derecha -->
+             <line x1="20" y1="10" x2="40" y2="10" stroke="red" stroke-width="2"/>
+             <text x="42" y="12" font-size="8" fill="red">20</text>
+             <!-- Salida izquierda (después del círculo) -->
+             <line x1="-3" y1="10" x2="-23" y2="10" stroke="red" stroke-width="2"/>
+             <text x="-38" y="12" font-size="8" fill="black">21</text>
+          </g>
+
+          <!-- MUX 2 - Después de Instruction Memory (un poco más a la derecha) -->
+          <g id="mux_inst" class="component" transform="translate(420, 120)">
+             <polygon points="0,0 15,8 15,58 0,66" fill="#e0e0e0" stroke="black" stroke-width="2"/>
+             <text x="3" y="20" font-size="9">0</text>
+             <text x="3" y="50" font-size="9">1</text>
+             <!-- Entrada izquierda superior (0) -->
+             <line x1="0" y1="16" x2="-20" y2="16" stroke="red" stroke-width="2"/>
+             <text x="-35" y="18" font-size="8" fill="red">22</text>
+             <!-- Entrada izquierda inferior (1) -->
+             <line x1="0" y1="50" x2="-20" y2="50" stroke="red" stroke-width="2"/>
+             <text x="-35" y="52" font-size="8" fill="red">23</text>
+             <!-- Salida derecha -->
+             <line x1="15" y1="33" x2="35" y2="33" stroke="red" stroke-width="2"/>
+             <text x="37" y="35" font-size="8" fill="black">24</text>
+             <!-- Entrada de control (selector) -->
+             <line x1="7.5" y1="66" x2="7.5" y2="80" stroke="red" stroke-width="2"/>
+             <text x="10" y="90" font-size="8" fill="red">25</text>
+          </g>
+
+          <!-- Instruction Memory (Memoria de programa) -->
+          <g id="im_mem" class="component" transform="translate(180, 50)">
+             <rect x="0" y="0" width="150" height="250" fill="white" stroke="black" stroke-width="2"/>
+             <text x="20" y="30" font-weight="bold">Memoria de</text>
+             <text x="30" y="50" font-weight="bold">programa</text>
+             
+             <!-- Entrada izquierda -->
+             <line x1="0" y1="125" x2="-20" y2="125" stroke="red" stroke-width="2"/>
+             <text x="-35" y="127" font-size="8" fill="red">26</text>
+             
+             <!-- Salida derecha -->
+             <line x1="150" y1="125" x2="170" y2="125" stroke="black" stroke-width="2"/>
+             <text x="172" y="127" font-size="8" fill="black">27</text>
+             
+             <!-- Instrucciones de ejemplo -->
+             <text x="5" y="80" font-family="monospace" font-size="9">0</text>
+             <text x="25" y="80" font-family="monospace" font-size="9">bne x20,x19,Else do</text>
+             <text x="5" y="110" font-family="monospace" font-size="9">4</text>
+             <text x="25" y="110" font-family="monospace" font-size="9">add x19, x20, x21</text>
+             <text x="5" y="140" font-family="monospace" font-size="9">8</text>
+             <text x="25" y="140" font-family="monospace" font-size="9">beq x0, x0, Exit</text>
+             <text x="5" y="170" font-family="monospace" font-size="9">12</text>
+             <text x="25" y="170" font-family="monospace" font-size="9">sub x19, x20, x21</text>
+          </g>
+
+          <!-- Sign Extend (a la altura del MUX) -->
+          <g id="sign_ext" class="component" transform="translate(550, 130)">
+             <polygon points="0,15 120,0 120,50 0,35" fill="white" stroke="black" stroke-width="2"/>
+             <text x="20" y="30" font-weight="bold">Sign Extend</text>
+             <!-- Entrada izquierda -->
+             <line x1="0" y1="25" x2="-20" y2="25" stroke="red" stroke-width="2"/>
+             <text x="-35" y="27" font-size="8" fill="red">28</text>
+             <!-- Salida derecha -->
+             <line x1="120" y1="25" x2="140" y2="25" stroke="black" stroke-width="2"/>
+             <text x="142" y="27" font-size="8" fill="black">29</text>
+          </g>
+
+          <!-- Banco de Registros (RF) -->
+          <g id="reg_file" class="component" transform="translate(500, 260)">
+             <rect x="0" y="0" width="160" height="200" fill="white" stroke="black" stroke-width="2"/>
+             <text x="60" y="180" font-weight="bold">RF</text>
+             <text x="20" y="195" font-weight="bold" font-size="10">Banco de registros</text>
+             
+             <!-- Entradas -->
+
+             <text x="-60" y="20" font-size="9" fill="blue">di</text>
+             <line x1="0" y1="4" x2="-20" y2="4" stroke="red" stroke-width="2"/>
+             <text x="-70" y="4" font-size="8" fill="red">30</text>
+             
+
+             <line x1="0" y1="30" x2="-20" y2="30" stroke="red" stroke-width="2"/>   
+             <text x="-60" y="35" font-size="9" fill="blue">a1</text>
+             <text x="-70" y="30" font-size="8" fill="red">31</text>
+             
+             <line x1="0" y1="60" x2="-20" y2="60" stroke="red" stroke-width="2"/>
+             <text x="-60" y="65" font-size="9" fill="green">a2</text>
+             <text x="-70" y="60" font-size="8" fill="red">32</text>
+             
+             <line x1="0" y1="100" x2="-20" y2="100" stroke="red" stroke-width="2"/>
+             <text x="-60" y="105" font-size="9" fill="blue">ad</text>
+             <text x="-70" y="100" font-size="8" fill="red">33</text>
+             
+             <line x1="0" y1="130" x2="-20" y2="130" stroke="red" stroke-width="2"/>
+             <text x="-60" y="135" font-size="9" fill="blue">we</text>
+             <text x="-70" y="130" font-size="8" fill="red">34</text>
+             
+             <!-- Salidas -->
+             <line x1="160" y1="30" x2="180" y2="30" stroke="blue" stroke-width="2"/>
+             <text x="185" y="35" font-size="9" fill="blue">d2</text>
+             <text x="195" y="30" font-size="8" fill="black">35</text>
+             
+             <line x1="160" y1="60" x2="180" y2="60" stroke="green" stroke-width="2"/>
+             <text x="185" y="65" font-size="9" fill="green">d1</text>
+             <text x="195" y="60" font-size="8" fill="black">36</text>
+             
+             <!-- Valores internos -->
+             <text x="10" y="50" font-family="monospace" font-size="8">0...</text>
+             <text x="50" y="50" font-family="monospace" font-size="8">0x00000000</text>
+             <text x="10" y="80" font-family="monospace" font-size="8">19</text>
+             <text x="50" y="80" font-family="monospace" font-size="8">0x00000000</text>
+             <text x="10" y="110" font-family="monospace" font-size="8">20</text>
+             <text x="50" y="110" font-family="monospace" font-size="8">0x00000001</text>
+             <text x="10" y="140" font-family="monospace" font-size="8">21</text>
+             <text x="50" y="140" font-family="monospace" font-size="8">0x00000009</text>
+             <text x="10" y="160" font-family="monospace" font-size="8">...</text>
+             <text x="50" y="160" font-family="monospace" font-size="8">31</text>
+          </g>
+
+          <!-- MUX 3 - Antes de la ALU (un poco más a la derecha, selecciona segundo operando) -->
+          <g id="mux_alu" class="component" transform="translate(760, 290)">
+             <polygon points="0,0 15,8 15,58 0,66" fill="#e0e0e0" stroke="black" stroke-width="2"/>
+             <text x="3" y="20" font-size="9">0</text>
+             <text x="3" y="50" font-size="9">1</text>
+             <!-- Entrada izquierda superior (0) -->
+             <line x1="0" y1="16" x2="-20" y2="16" stroke="red" stroke-width="2"/>
+             <text x="-35" y="18" font-size="8" fill="red">37</text>
+             <!-- Entrada izquierda inferior (1) -->
+             <line x1="0" y1="50" x2="-20" y2="50" stroke="red" stroke-width="2"/>
+             <text x="-35" y="52" font-size="8" fill="red">38</text>
+             <!-- Salida derecha -->
+             <line x1="15" y1="33" x2="35" y2="33" stroke="red" stroke-width="2"/>
+             <text x="37" y="35" font-size="8" fill="black">39</text>
+             <!-- Entrada de control (selector) - más pegado -->
+             <line x1="7.5" y1="62" x2="7.5" y2="78" stroke="red" stroke-width="2"/>
+             <text x="10" y="88" font-size="8" fill="red">40</text>
+          </g>
+
+          <!-- ALU (un poco más a la derecha) -->
+          <g id="alu" class="component" transform="translate(850, 280)">
+             <path d="M0,0 L50,25 L50,75 L0,100 L0,60 L25,50 L0,40 Z" fill="white" stroke="black" stroke-width="2"/>
+             <text x="55" y="40" font-weight="bold">ALU</text>
+             
+             <!-- Entrada superior -->
+             <line x1="0" y1="20" x2="-20" y2="20" stroke="red" stroke-width="2"/>
+             <text x="-35" y="22" font-size="8" fill="red">41</text>
+             <!-- Entrada inferior -->
+             <line x1="0" y1="70" x2="-20" y2="70" stroke="red" stroke-width="2"/>
+             <text x="-35" y="72" font-size="8" fill="red">42</text>
+             <!-- Salida derecha -->
+             <line x1="50" y1="50" x2="70" y2="50" stroke="red" stroke-width="2"/>
+             <text x="72" y="52" font-size="8" fill="black">43</text>
+             
+             <!-- Salida inferior (zero flag / control) -->
+             <line x1="25" y1="87" x2="25" y2="114" stroke="red" stroke-width="2"/>
+             <text x="28" y="125" font-size="8" fill="black">44</text>
+          </g>
+
+          <!-- Memoria de Datos (DM) -->
+          <g id="data_mem" class="component" transform="translate(1150, 120)">
+             <rect x="0" y="0" width="180" height="200" fill="white" stroke="black" stroke-width="2"/>
+             <text x="40" y="185" font-weight="bold">DM</text>
+             <text x="20" y="200" font-weight="bold" font-size="10">Memoria de datos</text>
+             
+             <!-- Entradas -->
+
+             <line x1="0" y1="35" x2="-20" y2="35" stroke="green" stroke-width="2"/>
+             <text x="-30" y="35" font-size="9" fill="green">di</text>
+             <text x="-40" y="35" font-size="8" fill="red">45</text>
+
+             <line x1="0" y1="60" x2="-20" y2="60" stroke="purple" stroke-width="2"/>
+             <text x="-25" y="55" font-size="9" fill="purple">a</text>
+             <text x="-40" y="60" font-size="8" fill="red">46</text>
+             
+             <line x1="0" y1="120" x2="-20" y2="120" stroke="green" stroke-width="2"/>
+             <text x="-30" y="115" font-size="9" fill="green">we</text>
+             <text x="-40" y="120" font-size="8" fill="red">47</text>
+             
+             <!-- Salidas -->
+             <line x1="180" y1="30" x2="200" y2="30" stroke="blue" stroke-width="2"/>
+             <text x="205" y="35" font-size="9" fill="blue">d1</text>
+             <text x="215" y="30" font-size="8" fill="black">48</text>
+             
+             <!-- Datos internos -->
+             <text x="10" y="30" font-family="monospace" font-size="9">0</text>
+             <text x="40" y="30" font-family="monospace" font-size="9">0x00000005</text>
+             <text x="130" y="30" font-family="monospace" font-size="9">dd</text>
+             
+             <text x="10" y="60" font-family="monospace" font-size="9">4</text>
+             <text x="40" y="60" font-family="monospace" font-size="9">0x000000AF</text>
+             
+             <text x="10" y="90" font-family="monospace" font-size="9">8</text>
+             <text x="40" y="90" font-family="monospace" font-size="9">0x00000007</text>
+             
+             <text x="10" y="120" font-family="monospace" font-size="9">12</text>
+             <text x="40" y="120" font-family="monospace" font-size="9">0x00000003</text>
+             
+             <text x="10" y="150" font-family="monospace" font-size="9">...</text>
+             <text x="10" y="170" font-family="monospace" font-size="9">16</text>
+          </g>
+
+          <!-- MUX 5 - Superior (más arriba y más a la izquierda, mirando hacia la izquierda) -->
+          <g id="mux_wb2" class="component" transform="translate(1050, 40)">
+             <polygon points="30,0 15,8 15,58 30,66" fill="#e0e0e0" stroke="black" stroke-width="2"/>
+             <text x="20" y="20" font-size="9">0</text>
+             <text x="20" y="50" font-size="9">1</text>
+             <!-- Entrada derecha superior (0) -->
+             <line x1="30" y1="16" x2="50" y2="16" stroke="red" stroke-width="2"/>
+             <text x="52" y="18" font-size="8" fill="red">49</text>
+             <!-- Entrada derecha inferior (1) -->
+             <line x1="30" y1="50" x2="50" y2="50" stroke="red" stroke-width="2"/>
+             <text x="52" y="52" font-size="8" fill="red">50</text>
+             <!-- Salida izquierda -->
+             <line x1="15" y1="33" x2="-5" y2="33" stroke="black" stroke-width="2"/>
+             <text x="-20" y="35" font-size="8" fill="black">51</text>
+             <!-- Entrada de control (selector) -->
+             <line x1="22.5" y1="66" x2="22.5" y2="80" stroke="red" stroke-width="2"/>
+             <text x="25" y="90" font-size="8" fill="red">52</text>
+          </g>
+
+          <!-- Unidad de Control (CU) -->
+          <g id="control_unit" class="component" transform="translate(900, 550)">
+             <rect x="0" y="0" width="220" height="100" fill="white" stroke="black" stroke-width="2"/>
+             <text x="70" y="40" font-weight="bold" font-size="16">CU</text>
+             <text x="25" y="65" font-weight="bold" font-size="12">Unidad de Control</text>
+             
+             <!-- Salidas arriba (4) -->
+             <line x1="40" y1="0" x2="40" y2="-20" stroke="black" stroke-width="2"/>
+             <text x="35" y="-23" font-size="8" fill="black">53</text>
+             <line x1="80" y1="0" x2="80" y2="-20" stroke="purple" stroke-width="2"/>
+             <text x="75" y="-23" font-size="8" fill="purple">54</text>
+             <line x1="140" y1="0" x2="140" y2="-20" stroke="black" stroke-width="2"/>
+             <text x="135" y="-23" font-size="8" fill="black">55</text>
+             <line x1="180" y1="0" x2="180" y2="-20" stroke="black" stroke-width="2"/>
+             <text x="175" y="-23" font-size="8" fill="black">56</text>
+             
+             <!-- Salidas lado izquierdo (4) -->
+             <line x1="0" y1="20" x2="-20" y2="20" stroke="black" stroke-width="2"/>
+             <text x="-35" y="22" font-size="8" fill="black">57</text>
+             <line x1="0" y1="40" x2="-20" y2="40" stroke="black" stroke-width="2"/>
+             <text x="-35" y="42" font-size="8" fill="black">58</text>
              <line x1="0" y1="60" x2="-20" y2="60" stroke="black" stroke-width="2"/>
-             <text x="-45" y="65" font-size="9">B</text>
-             <line x1="40" y1="40" x2="60" y2="40" stroke="purple" stroke-width="2"/>
-             <text x="65" y="45" font-size="9" fill="purple">Res</text>
-             <line x1="20" y1="80" x2="20" y2="100" stroke="orange" stroke-width="2"/>
-             <text x="25" y="95" font-size="9" fill="orange">Z</text>
-          </g>
-          
-          <!-- Data Memory -->
-          <g id="data_mem" class="component" transform="translate(960, 280)">
-             <rect x="0" y="0" width="130" height="180" fill="white" stroke="black" stroke-width="2"/>
-             <text x="30" y="90" font-weight="bold">Memoria</text>
-             <text x="35" y="110" font-weight="bold">Datos</text>
-             <line x1="0" y1="30" x2="-20" y2="30" stroke="purple" stroke-width="2"/>
-             <text x="-60" y="35" font-size="9" fill="purple">Addr</text>
-             <line x1="0" y1="100" x2="-20" y2="100" stroke="green" stroke-width="2"/>
-             <text x="-50" y="105" font-size="9" fill="green">WD</text>
-             <line x1="130" y1="30" x2="150" y2="30" stroke="black" stroke-width="2"/>
-             <text x="155" y="35" font-size="9">RD</text>
-          </g>
-          
-          <!-- WB MUX 1 (selecciona entre ALU result y Memory data) -->
-          <g id="mux_wb1" class="component" transform="translate(1140, 280)">
-             <polygon points="0,0 25,10 25,60 0,70" fill="#e0e0e0" stroke="black" stroke-width="2"/>
-             <text x="5" y="20" font-size="10">0</text>
-             <text x="5" y="55" font-size="10">1</text>
-          </g>
-          
-          <!-- WB MUX 2 (selecciona entre resultado anterior y PC+4) -->
-          <g id="mux_wb2" class="component" transform="translate(1200, 140)">
-             <polygon points="0,0 25,10 25,60 0,70" fill="#e0e0e0" stroke="black" stroke-width="2"/>
-             <text x="5" y="20" font-size="10">0</text>
-             <text x="5" y="55" font-size="10">1</text>
+             <text x="-35" y="62" font-size="8" fill="black">59</text>
+             <line x1="0" y1="80" x2="-20" y2="80" stroke="black" stroke-width="2"/>
+             <text x="-35" y="82" font-size="8" fill="black">60</text>
+             
+             <!-- Señales de salida (etiquetas) -->
+             <text x="150" y="20" font-size="8">we1</text>
+             <text x="150" y="35" font-size="8">imm_rd</text>
+             <text x="150" y="50" font-size="8">alu_reg</text>
+             <text x="150" y="65" font-size="8">br_neq</text>
+             <text x="150" y="80" font-size="8">branch</text>
           </g>
 
-          <!-- Control Unit -->
-          <g id="control_unit" class="component" transform="translate(680, 640)">
-             <rect x="0" y="0" width="180" height="100" fill="white" stroke="black" stroke-width="2"/>
-             <text x="30" y="50" font-weight="bold" font-size="14">Unidad de</text>
-             <text x="40" y="70" font-weight="bold" font-size="14">Control</text>
-          </g>
 
-          <!-- ========== CABLES MEJORADOS - SIN PASAR POR ENCIMA DE MÓDULOS ========== -->
+          <!-- CABLES DEL DATAPATH -->
           
-          <!-- De Instruction Memory a Control (opcode) -->
-          <path id="w_opcode" class="cable" d="M 330 260 L 350 260 L 350 700 L 680 700" />
+          <!-- Cable 1: Salida de PC a entrada de Memoria de Programa -->
+          <path id="cable_pc_to_mem" class="cable" 
+                d="M 100 310 L 160 310 L 160 175" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
           
-          <!-- Señales de Control -->
-          <path id="w_ctrl_reg_dst" class="cable" d="M 680 660 L 405 660 L 405 540 L 405 520" />
-          <path id="w_ctrl_alu_src" class="cable" d="M 760 640 L 760 600 L 672 600 L 672 470" />
-          <path id="w_ctrl_reg_write" class="cable" d="M 700 640 L 700 620 L 450 620 L 450 565 L 450 540 L 460 540" />
-          <path id="w_ctrl_mem_write" class="cable" d="M 840 690 L 950 690 L 950 465 L 950 460" />
-          <path id="w_ctrl_branch" class="cable" d="M 680 720 L 270 720 L 270 610" />
+          <!-- Cable 2: Derivación desde cable PC hacia entrada izquierda del sumador -->
+          <circle cx="130" cy="310" r="3" fill="#87CEEB"/>
+          <path id="cable_pc_to_adder" class="cable" 
+                d="M 130 310 L 130 480" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+          
+          <!-- Cable 3: Salida del sumador a entrada izquierda de la PC -->
+          <path id="cable_adder_to_pc" class="cable" 
+                d="M 145 540 L 145 560 L 10 560 L 10 310 L 15 310" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+          
+          <!-- Cable 4: Salida izquierda de Order & Sign Extend a entrada derecha (1) del MUX -->
+          <path id="cable_order_to_mux" class="cable" 
+                d="M 260 370 L 177 370 L 177 380" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+          
+          <!-- Cable 5: Salida del MUX a entrada derecha del Sumador -->
+          <path id="cable_mux_to_adder_right" class="cable" 
+                d="M 160 430 L 160 450 L 160 480" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+          
+          <!-- Cable 6: Salida de AND a control del MUX (arriba del sumador) -->
+          <path id="cable_and_to_mux_ctrl" class="cable" 
+                d="M 260 550 L 195 550 L 195 402.5" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+          
+<!-- Cable 7: Salida de Memoria de Programa a entrada inferior del Banco de Registros (ad) -->
+          <path id="cable_mem_to_reg_ad" class="cable" 
+                d="M 350 175 L 380 175 L 380 210 L 470 210 L 470 360 L 480 360" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+          
+          <!-- Círculos de conexión en el cable horizontal -->
 
-          <!-- Instrucción rs2 a muxes -->
-          <path id="w_inst_20_16_mux" class="cable" d="M 330 420 L 355 420 L 355 470 L 390 470" />
-          <path id="w_inst_11_7_mux" class="cable" d="M 330 420 L 375 420 L 375 510 L 390 510" />
-          <path id="w_mux_dst_out" class="cable" d="M 415 490 L 440 490 L 440 490 L 460 490" />
+          <circle cx="400" cy="210" r="3" fill="#87CEEB"/>
+          <circle cx="410" cy="210" r="3" fill="#87CEEB"/>
+          
+          <!-- Cable 8: Salida de Sign Extend a entrada superior (0) del MUX de la ALU -->
+          <path id="cable_signext_to_mux_alu" class="cable" 
+                d="M 690 155 L 720 155 L 720 306 L 740 306" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+          
+<!-- Cable 9: Salida d2 del Banco de Registros a entrada inferior de la ALU -->
+          <path id="cable_reg_d2_to_alu" class="cable" 
+                d="M 680 320 L 710 320 L 710 410 L 820 410 L 820 350 L 830 350" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+          
+          <!-- Cable 10: Salida del MUX inst a entrada del Sign Extend -->
+          <path id="cable_mux_to_signext" class="cable" 
+                d="M 455 153 L 530.5 155" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
 
-          <!-- PC a Memoria y sumador -->
-          <path id="w_pc_out" class="cable" d="M 130 560 L 160 560" />
-          <path id="w_pc_mem" class="cable" d="M 160 560 L 160 530 L 160 380 L 180 380" />
-          <path id="w_pc_to_adder" class="cable" d="M 160 560 L 160 530 L 160 500 L 80 500 L 80 425 L 90 425" />
-          
-          <!-- PC+4 -->
-          <path id="w_pc4_out" class="cable" d="M 130 425 L 160 425" />
-          <path id="w_purple" class="cable" d="M 160 425 L 160 330 L 160 120 L 1180 120 L 1180 190 L 1200 190" />
-          <path id="w_pc4_loop" class="cable" d="M 160 425 L 160 480 L 20 480 L 20 535 L 30 535" />
-          
-          <!-- Entrada al PC desde MUX -->
-          <path id="w_pc_in" class="cable" d="M 60 560 L 90 560" />
+          <!-- Cable 11: Salida d1 del Banco de Registros a entrada superior (0) del MUX de la ALU -->
+          <path id="cable_reg_d1_to_mux_alu" class="cable" 
+                d="M 680 290 L 700 290 L 700 240 L 730 240 L 730 340 L 740 340" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
 
-          <!-- rs1 y rs2 desde Instruction Memory a Register File -->
-          <path id="w_rs1" class="cable" d="M 330 340 L 430 340 L 430 380 L 460 380" />
-          <path id="w_rs2" class="cable" d="M 330 380 L 420 380 L 420 420 L 460 420" />
-          
-          <!-- Inmediato desde Instruction Memory a Sign Extend -->
-          <path id="w_imm" class="cable" d="M 330 280 L 350 280 L 350 250 L 520 250" />
-          
-          <!-- Inmediato extendido desde Sign Extend al MUX de ALU -->
-          <path id="w_imm_alu" class="cable" d="M 620 250 L 650 250 L 650 330 L 650 450 L 660 450" />
-          
-          <!-- Datos desde Register File (salida d1) -->
-          <path id="w_rs1_dat" class="cable" d="M 620 380 L 730 380" />
-          
-          <!-- Datos desde Register File (salida d2) -->
-          <path id="w_rs2_dat" class="cable" d="M 620 420 L 630 420" />
-          
-          <!-- Salida de ALU MUX -->
-          <path id="w_mux_alu_out" class="cable" d="M 685 435 L 720 435 L 720 420 L 730 420" />
-          
-          <!-- Resultado de ALU a Memoria de Datos (dirección) -->
-          <path id="w_alu_res" class="cable" d="M 810 400 L 900 400 L 900 310 L 940 310 L 960 310" />
-          
-          <!-- Datos a escribir en memoria (desde d2) -->
-          <path id="w_mem_write_data" class="cable" d="M 630 420 L 630 575 L 900 575 L 900 380 L 940 380 L 960 380" />
-          
-          <!-- Datos leídos desde memoria -->
-          <path id="w_mem_read_data" class="cable" d="M 1110 310 L 1140 310" />
-          
-          <!-- Bypass de ALU a WB MUX 1 -->
-          <path id="w_alu_bypass" class="cable" d="M 900 400 L 900 335 L 1120 335 L 1140 335" />
-          
-          <!-- Salida de WB MUX 1 a WB MUX 2 -->
-          <path id="w_wb1_out" class="cable" d="M 1165 315 L 1180 315 L 1180 260 L 1180 160 L 1200 160" />
-          
-          <!-- Salida de WB MUX 2 de regreso a Register File -->
-          <path id="w_wb2_out" class="cable" d="M 1225 175 L 1280 175 L 1280 600 L 590 600 L 590 520 L 460 520" />
+         <!-- Cable 12: Entrada di de Memoria de Datos conectada al cable d1 en punto más cercano -->
+          <circle cx="730" cy="240" r="3" fill="#87CEEB"/>
+          <path id="cable_mem_di" class="cable" 
+                d="M 730 240 L 730 155 L 1130 155" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
 
-          <!-- Zero flag desde ALU a branch gates -->
-          <path id="w_zero" class="cable" d="M 770 440 L 770 480 L 770 560 L 345 560 L 345 585" />
+          <!-- Cable 13: Salida del MUX branch a primera entrada de AND -->
+          <path id="cable_mux_branch_to_and" class="cable" 
+                d="M 365 555 L 330 555 L 330 540" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 14: Última salida izquierda de CU a segunda entrada de AND -->
+          <path id="cable_cu_to_and" class="cable" 
+                d="M 880 630 L 330 630 L 330 560" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 15: Salida de NOT a entrada inferior (1) del MUX branch -->
+          <path id="cable_not_to_mux_branch" class="cable" 
+                d="M 447 555 L 420 555 L 420 570" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 16: Conexión corta a entrada a1 del RF desde cable de memoria -->
+          <circle cx="470" cy="290" r="3" fill="#87CEEB"/>
+          <path id="cable_mem_to_a1" class="cable" 
+                d="M 470 290 L 480 290" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 17: Conexión corta a entrada a2 del RF desde cable de memoria -->
+          <circle cx="470" cy="320" r="3" fill="#87CEEB"/>
+          <path id="cable_mem_to_a2" class="cable" 
+                d="M 470 320 L 480 320" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 18: Conexión corta a entrada ad del RF desde cable de memoria -->
+          <circle cx="470" cy="360" r="3" fill="#87CEEB"/>
+          <path id="cable_mem_to_ad" class="cable" 
+                d="M 470 360 L 480 360" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 19: Conexión a entrada superior de Order & Sign Extend desde cable de memoria -->
+          <circle cx="410" cy="362" r="3" fill="#87CEEB"/>
+          <path id="cable_mem_to_order_top" class="cable" 
+                d="M 380 210 L 410 210 L 410 362 L 400 362" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 20: Conexión a entrada inferior de Order & Sign Extend desde cable de memoria -->
+          <path id="cable_mem_to_order_bottom" class="cable" 
+                d="M 400 210 L 400 378" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 21: Primera salida superior de CU al control del MUX de la ALU -->
+          <path id="cable_cu_to_mux_alu_ctrl" class="cable" 
+                d="M 940 530 L 940 400 L 767.5 400 L 767.5 368" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 22: Pin 54 (segunda salida superior de CU) a Pin 44 (controlador de ALU) -->
+          <path id="cable_cu_to_alu_ctrl" class="cable" 
+                d="M 980 530 L 980 420 L 875 420 L 875 394" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 23: Salida de la ALU a entrada "a" de la Memoria de Datos -->
+          <path id="cable_alu_to_dm" class="cable" 
+                d="M 920 330 L 1100 330 L 1100 180 L 1130 180" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
           
-          <!-- Salida de AND gate a PC MUX -->
-          <path id="w_and_out" class="cable" d="M 280 595 L 250 595 L 45 595 L 45 565 L 45 560" />
+          <!-- Círculo de conexión para derivación al pin 16 -->
+          <circle cx="1000" cy="330" r="3" fill="#87CEEB"/>
+          
+          <!-- Círculo de conexión para derivación al pin 50 en el cable vertical -->
+          <circle cx="1100" cy="180" r="3" fill="#87CEEB"/>
+          
+          <!-- Cable nuevo: Pin 50 (entrada inferior MUX5) al cable ALU-DM -->
+          <path id="cable_mux5_to_alu" class="cable" 
+                d="M 1100 90 L 1100 180" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+          
+          <!-- Cable nuevo: Pin 16 (entrada superior MUX branch) al cable ALU-DM -->
+          <path id="cable_mux_branch_to_alu" class="cable" 
+                d="M 420 540 L 1000 540 L 1000 330" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+          
+          <!-- Círculo de conexión para derivación al pin 20 -->
+          <circle cx="510" cy="540" r="3" fill="#87CEEB"/>
+          
+          <!-- Cable nuevo: Pin 20 (entrada de NOT) al cable horizontal del pin 16 -->
+          <path id="cable_not_to_alu" class="cable" 
+                d="M 510 555 L 510 540" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 24: Pin 47 (we de DM) a Pin 56 (salida superior derecha de CU) -->
+          <path id="cable_cu_to_dm_we" class="cable" 
+                d="M 1080 530 L 1080 500 L 1120 500 L 1120 240 L 1130 240" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 25: Pin 48 (salida d1 de DM) a Pin 49 (entrada superior derecha de MUX5) -->
+          <path id="cable_dm_to_mux5" class="cable" 
+                d="M 1350 150 L 1370 150 L 1370 30 L 1100 30 L 1100 56" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+          
+          <!-- Círculo de conexión en cable de DM a MUX5 -->
+          <circle cx="1100" cy="30" r="3" fill="#87CEEB"/>
+
+          <!-- Cable 26: Pin 55 (tercera salida superior de CU) a Pin 52 (control de MUX5) -->
+          <path id="cable_cu_to_mux5_ctrl" class="cable" 
+                d="M 1040 530 L 1040 130 L 1072.5 130 L 1072.5 120" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 27: Pin 59 (tercera salida izquierda de CU) a Pin 19 (control de MUX branch) -->
+          <path id="cable_cu_to_mux_branch_ctrl" class="cable" 
+                d="M 880 610 L 392.5 610 L 392.5 600" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 28: Pin 58 (segunda salida izquierda de CU) a Pin 25 (control de MUX inst) -->
+          <path id="cable_cu_to_mux_inst_ctrl" class="cable" 
+                d="M 880 590 L 450 590 L 450 200 L 427.5 200" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 29: Pin 57 (primera salida izquierda de CU) a Pin 34 (we del RF) -->
+          <path id="cable_cu_to_rf_we" class="cable" 
+                d="M 880 570 L 850 570 L 850 470 L 460 470 L 460 390 L 480 390" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 30: Pin 22 (entrada superior de MUX inst) al cable vertical de memoria -->
+          <circle cx="380" cy="175" r="3" fill="#87CEEB"/>
+          <path id="cable_mem_to_mux_inst_0" class="cable" 
+                d="M 380 175 L 380 136 L 420 136" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 31: Pin 23 (entrada inferior de MUX inst) al cable vertical de memoria -->
+          <circle cx="390" cy="210" r="3" fill="#87CEEB"/>
+          <path id="cable_mem_to_mux_inst_1" class="cable" 
+                d="M 390 210 L 390 170 L 420 170" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+
+          <!-- Cable 33: Pin 51 (salida de MUX5) a Pin 30 (entrada di del RF) -->
+          <path id="cable_mux5_to_rf_di" class="cable" 
+                d="M 1045 73 L 1045 100 L 440 100 L 440 264 L 480 264" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+          
+          <!-- Círculo de conexión para cable entre pin 24-28 -->
+          <circle cx="500" cy="153" r="3" fill="#87CEEB"/>
+          
+          <!-- Círculo de conexión en cable horizontal de memoria de instrucciones -->
+          <circle cx="470" cy="210" r="3" fill="#87CEEB"/>
+          
+          <!-- Cable NUEVO: Conexión entre pin 24-28 al cable que viene de memoria de instrucciones -->
+          <path id="cable_mux_signext_to_mem" class="cable" 
+                d="M 500 153 L 500 210 L 470 210" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+          <!-- Cable 34: Pin 39 (salida de MUX ALU) a Pin 41 (entrada superior de ALU) -->
+          <path id="cable_mux_alu_to_alu" class="cable" 
+                d="M 795 323 L 830 323 L 830 300" 
+                stroke="#87CEEB" stroke-width="2" fill="none"/>
+
+
+
+
+          
+          <!-- PLACEHOLDER PARA MÁS CABLES -->
+          
         </svg>
       </div>
     </div>

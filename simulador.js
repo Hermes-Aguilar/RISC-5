@@ -114,7 +114,6 @@ class RISCVSimulator {
       if (labels[s] !== undefined) {
         return labels[s] - address;
       }
-      // Soportar hexadecimal y binario
       if (s.startsWith('0x')) return parseInt(s, 16);
       if (s.startsWith('0b')) return parseInt(s.substring(2), 2);
       return parseInt(s);
@@ -231,7 +230,7 @@ class RISCVSimulator {
 
   async step() {
     await this.resetWires();
-    // Verificar si ya terminó
+    
     if (this.pc < 0 || this.pc >= this.instructions.length * 4) {
       this.setStatus('🏁 Programa finalizado', 'success');
       this.running = false;
@@ -249,7 +248,6 @@ class RISCVSimulator {
       return;
     }
 
-    // Highlight current instruction
     document.querySelectorAll('.inst-item').forEach(i => i.classList.remove('current'));
     document.getElementById(`inst-${instIndex}`)?.classList.add('current');
 
@@ -260,7 +258,6 @@ class RISCVSimulator {
     this.updateRegisters();
     this.updateMemory();
 
-    // Verificar si el programa se detuvo (por bucle infinito detectado)
     if (!this.running) {
       document.getElementById('btn-step').disabled = true;
       document.getElementById('btn-run').disabled = true;
@@ -268,14 +265,6 @@ class RISCVSimulator {
   }
 
   async executeInstruction(inst) {
-
-    // FETCH
-    await this.animateDatapath(['w_pc_out', 'w_pc_mem', 'w_pc_to_adder', 'w_pc4_out', 'w_purple']);
-    
-    // DECODE
-    await this.animate('w_opcode');
-    this.activateComponent('control_unit');
-
     try {
       switch (inst.type) {
         case 'R':
@@ -301,196 +290,537 @@ class RISCVSimulator {
       this.setStatus(`❌ Error ejecutando: ${err.message}`, 'error');
       this.running = false;
     }
-
-    this.deactivateComponent('control_unit');
   }
 
   async executeRType(inst) {
-    await this.animateDatapath(['w_ctrl_reg_write', 'w_ctrl_reg_dst', 'w_ctrl_alu_src']);
+    // =============================================
+    // FLUJO PARA INSTRUCCIONES TIPO R (add, sub, and, or, etc)
+    // =============================================
     
-    await this.animate('w_rs1');
-    await this.animate('w_rs2');
+    // PASO 1: FETCH - Leer PC y buscar instrucción en memoria
+    this.setStatus(`📍 FETCH: Leyendo PC=${this.pc}`, 'info');
+    await this.animate('cable_pc_to_mem');
+    this.activateComponent('im_mem');
+    await this.sleep(300);
     
+    // PASO 2: PC+4 - Calcular siguiente PC
+    this.setStatus(`➕ Calculando PC+4`, 'info');
+    await this.animate('cable_pc_to_adder'); // PC va al sumador
+    // Cable con constante "4" está conectado permanentemente al sumador
+    this.activateComponent('adder_pc4');
+    // El resultado PC+4 se queda en el sumador, no lo enviamos todavía
+    await this.sleep(300);
+    
+    // PASO 3: DECODE - Extraer campos de la instrucción (rs1, rs2, rd)
+    this.setStatus(`🔍 DECODE: Extrayendo campos rs1=${inst.rs1}, rs2=${inst.rs2}, rd=${inst.rd}`, 'info');
+    await this.animate('cable_mem_to_reg_ad');
+    await this.animate('cable_mem_to_a1');
+    await this.animate('cable_mem_to_a2');
+    await this.sleep(300);
+    
+    // PASO 4: Activar Unidad de Control
+    this.setStatus(`⚙️ Unidad de Control: Tipo R`, 'info');
+    this.activateComponent('control_unit');
+    await this.animate('cable_cu_to_rf_we');
+    await this.animate('cable_cu_to_mux_alu_ctrl');
+    await this.animate('cable_cu_to_alu_ctrl'); // Control de operación ALU
+    await this.sleep(300);
+    
+    // PASO 5: READ - Leer registros rs1 y rs2
+    this.setStatus(`📖 READ: Leyendo x${inst.rs1}=${this.registers[inst.rs1]}, x${inst.rs2}=${this.registers[inst.rs2]}`, 'info');
     this.activateComponent('reg_file');
-    await this.animate('w_inst_11_7_mux');
-    await this.animate('w_mux_dst_out');
+    await this.animate('cable_reg_d1_to_mux_alu');
+    await this.animate('cable_reg_d2_to_alu');
+    await this.sleep(300);
     
-    await this.animate('w_rs1_dat');
-    await this.animate('w_rs2_dat');
-    await this.animate('w_mux_alu_out');
+    // PASO 6: MUX ALU - Seleccionar segundo operando (registro para tipo R)
+    this.setStatus(`🔀 MUX: Seleccionando rs2 para ALU`, 'info');
+    this.activateComponent('mux_alu');
+    await this.animate('cable_mux_alu_to_alu');
+    this.deactivateComponent('mux_alu');
+    await this.sleep(300);
     
-    this.activateComponent('alu');
+    // PASO 7: EXECUTE - Operación en la ALU
     const result = this.computeALU(inst.op, this.registers[inst.rs1], this.registers[inst.rs2]);
+    this.setStatus(`🔢 EXECUTE: ${inst.op.toUpperCase()} → resultado=${result}`, 'info');
+    this.activateComponent('alu');
+    await this.animate('cable_alu_to_dm');
+    await this.sleep(300);
     
-    await this.animate('w_alu_res');
-    await this.animate('w_alu_bypass');
-    await this.animate('w_wb1_out');
-    await this.animate('w_wb2_out');
+    // PASO 8: MUX WB - Seleccionar dato a escribir (resultado ALU para tipo R)
+    this.setStatus(`🔀 MUX WB: Seleccionando resultado ALU`, 'info');
+    await this.animate('cable_mux5_to_alu'); // Cable del pin 50 que conecta ALU al MUX
+    this.activateComponent('mux_wb2');
+    await this.animate('cable_mux5_to_rf_di');
+    this.deactivateComponent('mux_wb2');
+    await this.sleep(300);
     
+    // PASO 9: WRITE BACK - Escribir resultado en rd
+    this.setStatus(`✍️ WRITE BACK: Escribiendo ${result} en x${inst.rd}`, 'info');
     this.registers[inst.rd] = result;
     this.registers[0] = 0;
     this.highlightRegister(inst.rd);
+    await this.sleep(300);
     
+    // PASO 10: Actualizar PC - MUX selecciona PC+4 y actualiza
+    this.setStatus(`✅ Actualizando PC con PC+4`, 'info');
+    this.activateComponent('mux_pc');
+    await this.animate('cable_mux_to_adder_right'); // MUX selecciona entrada 0 (PC+4)
+    await this.animate('cable_adder_to_pc'); // Salida del MUX al PC
+    this.deactivateComponent('mux_pc');
+    this.pc += 4;
+    
+    // Cleanup
+    this.deactivateComponent('adder_pc4');
     this.deactivateComponent('alu');
     this.deactivateComponent('reg_file');
-    
-    await this.animateDatapath(['w_pc4_loop', 'w_pc_in']);
-    this.pc += 4;
+    this.deactivateComponent('im_mem');
+    this.deactivateComponent('control_unit');
   }
 
   async executeIType(inst) {
-    await this.animateDatapath(['w_ctrl_reg_write', 'w_ctrl_reg_dst', 'w_ctrl_alu_src']);
+    // =============================================
+    // FLUJO PARA INSTRUCCIONES TIPO I (addi, andi, ori, etc)
+    // =============================================
     
-    await this.animate('w_rs1');
-    await this.animate('w_imm');
+    // PASO 1: FETCH - Leer PC y buscar instrucción en memoria
+    this.setStatus(`📍 FETCH: Leyendo PC=${this.pc}`, 'info');
+    await this.animate('cable_pc_to_mem');
+    this.activateComponent('im_mem');
+    await this.sleep(300);
     
+    // PASO 2: PC+4 - Calcular siguiente PC
+    this.setStatus(`➕ Calculando PC+4`, 'info');
+    await this.animate('cable_pc_to_adder'); // PC va al sumador
+    // Cable con constante "4" está conectado permanentemente al sumador
+    this.activateComponent('adder_pc4');
+    // El resultado PC+4 se queda en el sumador, no lo enviamos todavía
+    await this.sleep(300);
+    
+    // PASO 3: DECODE - Extraer campos de la instrucción (rs1, rd, imm)
+    this.setStatus(`🔍 DECODE: rs1=${inst.rs1}, rd=${inst.rd}, imm=${inst.imm}`, 'info');
+    await this.animate('cable_mem_to_reg_ad'); // rd para write back
+    await this.animate('cable_mem_to_a1'); // rs1
+    // Extraer inmediato para Sign Extend
+    await this.animate('cable_mem_to_mux_inst_0'); // Campo superior al MUX inst
+    await this.animate('cable_mem_to_mux_inst_1'); // Campo inferior al MUX inst
+    await this.sleep(300);
+    
+    // PASO 4: Activar Unidad de Control
+    this.setStatus(`⚙️ Unidad de Control: Tipo I (inmediato)`, 'info');
+    this.activateComponent('control_unit');
+    await this.animate('cable_cu_to_rf_we');
+    await this.animate('cable_cu_to_mux_alu_ctrl');
+    await this.animate('cable_cu_to_alu_ctrl'); // Control de operación ALU
+    await this.sleep(300);
+    
+    // PASO 5: Sign Extend - Extender el inmediato
+    this.setStatus(`📏 Sign Extend: Extendiendo inmediato=${inst.imm}`, 'info');
+    // Primero el MUX inst selecciona qué campo pasar al Sign Extend
+    this.activateComponent('mux_inst');
+    await this.animate('cable_mux_to_signext'); // Salida del MUX inst
+    this.deactivateComponent('mux_inst');
     this.activateComponent('sign_ext');
-    await this.animate('w_inst_20_16_mux');
-    await this.animate('w_mux_dst_out');
-    await this.animate('w_imm_alu');
+    await this.animate('cable_signext_to_mux_alu'); // Salida del Sign Extend
+    this.deactivateComponent('sign_ext');
+    await this.sleep(300);
     
+    // PASO 6: READ - Leer registro rs1
+    this.setStatus(`📖 READ: Leyendo x${inst.rs1}=${this.registers[inst.rs1]}`, 'info');
     this.activateComponent('reg_file');
-    await this.animate('w_rs1_dat');
-    await this.animate('w_mux_alu_out');
+    await this.animate('cable_reg_d1_to_mux_alu');
+    await this.sleep(300);
     
-    this.activateComponent('alu');
+    // PASO 7: MUX ALU - Seleccionar segundo operando (inmediato para tipo I)
+    this.setStatus(`🔀 MUX: Seleccionando inmediato para ALU`, 'info');
+    this.activateComponent('mux_alu');
+    await this.animate('cable_mux_alu_to_alu');
+    this.deactivateComponent('mux_alu');
+    await this.sleep(300);
+    
+    // PASO 8: EXECUTE - Operación en la ALU
     const result = this.computeALU(inst.op, this.registers[inst.rs1], inst.imm);
+    this.setStatus(`🔢 EXECUTE: ${inst.op.toUpperCase()} → resultado=${result}`, 'info');
+    this.activateComponent('alu');
+    await this.animate('cable_alu_to_dm');
+    await this.sleep(300);
     
-    await this.animate('w_alu_res');
-    await this.animate('w_alu_bypass');
-    await this.animate('w_wb1_out');
-    await this.animate('w_wb2_out');
+    // PASO 9: MUX WB - Seleccionar dato a escribir (resultado ALU)
+    this.setStatus(`🔀 MUX WB: Seleccionando resultado ALU`, 'info');
+    await this.animate('cable_mux5_to_alu'); // Cable del pin 50 que conecta ALU al MUX
+    this.activateComponent('mux_wb2');
+    await this.animate('cable_mux5_to_rf_di');
+    this.deactivateComponent('mux_wb2');
+    await this.sleep(300);
     
+    // PASO 10: WRITE BACK - Escribir resultado en rd
+    this.setStatus(`✍️ WRITE BACK: Escribiendo ${result} en x${inst.rd}`, 'info');
     this.registers[inst.rd] = result;
     this.registers[0] = 0;
     this.highlightRegister(inst.rd);
+    await this.sleep(300);
     
+    // PASO 11: Actualizar PC - MUX selecciona PC+4 y actualiza
+    this.setStatus(`✅ Actualizando PC con PC+4`, 'info');
+    this.activateComponent('mux_pc');
+    await this.animate('cable_mux_to_adder_right'); // MUX selecciona entrada 0 (PC+4)
+    await this.animate('cable_adder_to_pc'); // Salida del MUX al PC
+    this.deactivateComponent('mux_pc');
+    this.pc += 4;
+    
+    // Cleanup
+    this.deactivateComponent('adder_pc4');
     this.deactivateComponent('alu');
     this.deactivateComponent('reg_file');
-    this.deactivateComponent('sign_ext');
-    
-    await this.animateDatapath(['w_pc4_loop', 'w_pc_in']);
-    this.pc += 4;
+    this.deactivateComponent('im_mem');
+    this.deactivateComponent('control_unit');
   }
 
   async executeLW(inst) {
-    await this.animateDatapath(['w_ctrl_reg_write', 'w_ctrl_reg_dst', 'w_ctrl_alu_src']);
+    // =============================================
+    // FLUJO PARA INSTRUCCIONES LOAD (lw)
+    // =============================================
     
-    await this.animate('w_rs1');
-    await this.animate('w_imm');
-    await this.animate('w_inst_20_16_mux');
-    await this.animate('w_mux_dst_out');
-    await this.animate('w_imm_alu');
+    // PASO 1: FETCH - Leer PC y buscar instrucción en memoria
+    this.setStatus(`📍 FETCH: Leyendo PC=${this.pc}`, 'info');
+    await this.animate('cable_pc_to_mem');
+    this.activateComponent('im_mem');
+    await this.sleep(300);
     
+    // PASO 2: PC+4 - Calcular siguiente PC
+    this.setStatus(`➕ Calculando PC+4`, 'info');
+    await this.animate('cable_pc_to_adder'); // PC va al sumador
+    // Cable con constante "4" está conectado permanentemente al sumador
+    this.activateComponent('adder_pc4');
+    // El resultado PC+4 se queda en el sumador, no lo enviamos todavía
+    await this.sleep(300);
+    
+    // PASO 3: DECODE - Extraer campos (rs1=base, rd=destino, offset=inmediato)
+    this.setStatus(`🔍 DECODE: lw x${inst.rd}, ${inst.imm}(x${inst.rs1})`, 'info');
+    await this.animate('cable_mem_to_reg_ad'); // rd para write back
+    await this.animate('cable_mem_to_a1'); // rs1
+    // Extraer inmediato para Sign Extend
+    await this.animate('cable_mem_to_mux_inst_0'); // Campo superior al MUX inst
+    await this.animate('cable_mem_to_mux_inst_1'); // Campo inferior al MUX inst
+    await this.sleep(300);
+    
+    // PASO 4: Activar Unidad de Control
+    this.setStatus(`⚙️ Unidad de Control: LOAD (MemRead=1, MemtoReg=1)`, 'info');
+    this.activateComponent('control_unit');
+    await this.animate('cable_cu_to_rf_we');
+    await this.animate('cable_cu_to_mux_alu_ctrl');
+    await this.animate('cable_cu_to_alu_ctrl'); // Control de operación ALU (ADD para dirección)
+    await this.animate('cable_cu_to_mux5_ctrl');
+    await this.sleep(300);
+    
+    // PASO 5: Sign Extend - Extender el offset
+    this.setStatus(`📏 Sign Extend: Extendiendo offset=${inst.imm}`, 'info');
+    // Primero el MUX inst selecciona qué campo pasar al Sign Extend
+    this.activateComponent('mux_inst');
+    await this.animate('cable_mux_to_signext'); // Salida del MUX inst
+    this.deactivateComponent('mux_inst');
+    this.activateComponent('sign_ext');
+    await this.animate('cable_signext_to_mux_alu'); // Salida del Sign Extend
+    this.deactivateComponent('sign_ext');
+    await this.sleep(300);
+    
+    // PASO 6: READ - Leer registro base (rs1)
+    this.setStatus(`📖 READ: Leyendo dirección base x${inst.rs1}=${this.registers[inst.rs1]}`, 'info');
     this.activateComponent('reg_file');
-    await this.animate('w_rs1_dat');
-    await this.animate('w_mux_alu_out');
+    await this.animate('cable_reg_d1_to_mux_alu');
+    await this.sleep(300);
     
-    this.activateComponent('alu');
+    // PASO 7: MUX ALU - Seleccionar offset (inmediato)
+    this.setStatus(`🔀 MUX: Seleccionando offset para ALU`, 'info');
+    this.activateComponent('mux_alu');
+    await this.animate('cable_mux_alu_to_alu');
+    this.deactivateComponent('mux_alu');
+    await this.sleep(300);
+    
+    // PASO 8: EXECUTE - Calcular dirección efectiva (base + offset)
     const addr = this.registers[inst.rs1] + inst.imm;
-    await this.animate('w_alu_res');
+    this.setStatus(`🔢 EXECUTE: Dirección efectiva = ${this.registers[inst.rs1]} + ${inst.imm} = ${addr}`, 'info');
+    this.activateComponent('alu');
+    await this.animate('cable_alu_to_dm');
+    await this.sleep(300);
     
+    // PASO 9: MEMORY READ - Leer dato de memoria de datos
+    this.setStatus(`💾 MEMORY READ: Leyendo dato en dirección [${addr}]`, 'info');
     this.activateComponent('data_mem');
     const data = this.memory[addr] || 0;
-    await this.animate('w_mem_read_data');
-    await this.animate('w_wb1_out');
-    await this.animate('w_wb2_out');
+    await this.animate('cable_dm_to_mux5');
+    await this.sleep(300);
     
+    // PASO 10: MUX WB - Seleccionar dato de memoria (MemtoReg=1)
+    this.setStatus(`🔀 MUX WB: Seleccionando dato de memoria=${data}`, 'info');
+    this.activateComponent('mux_wb2');
+    await this.animate('cable_mux5_to_rf_di');
+    this.deactivateComponent('mux_wb2');
+    await this.sleep(300);
+    
+    // PASO 11: WRITE BACK - Escribir dato en rd
+    this.setStatus(`✍️ WRITE BACK: Escribiendo ${data} en x${inst.rd}`, 'info');
     this.registers[inst.rd] = data;
     this.registers[0] = 0;
     this.highlightRegister(inst.rd);
+    await this.sleep(300);
     
+    // PASO 12: Actualizar PC - MUX selecciona PC+4 y actualiza
+    this.setStatus(`✅ Actualizando PC con PC+4`, 'info');
+    this.activateComponent('mux_pc');
+    await this.animate('cable_mux_to_adder_right'); // MUX selecciona entrada 0 (PC+4)
+    await this.animate('cable_adder_to_pc'); // Salida del MUX al PC
+    this.deactivateComponent('mux_pc');
+    this.pc += 4;
+    
+    // Cleanup
+    this.deactivateComponent('adder_pc4');
     this.deactivateComponent('data_mem');
     this.deactivateComponent('alu');
     this.deactivateComponent('reg_file');
-    
-    await this.animateDatapath(['w_pc4_loop', 'w_pc_in']);
-    this.pc += 4;
+    this.deactivateComponent('im_mem');
+    this.deactivateComponent('control_unit');
   }
 
   async executeSW(inst) {
-    await this.animateDatapath(['w_ctrl_mem_write', 'w_ctrl_alu_src']);
+    // =============================================
+    // FLUJO PARA INSTRUCCIONES STORE (sw)
+    // =============================================
     
-    await this.animate('w_rs1');
-    await this.animate('w_rs2');
-    await this.animate('w_imm');
-    await this.animate('w_imm_alu');
+    // PASO 1: FETCH - Leer PC y buscar instrucción en memoria
+    this.setStatus(`📍 FETCH: Leyendo PC=${this.pc}`, 'info');
+    await this.animate('cable_pc_to_mem');
+    this.activateComponent('im_mem');
+    await this.sleep(300);
     
+    // PASO 2: PC+4 - Calcular siguiente PC
+    this.setStatus(`➕ Calculando PC+4`, 'info');
+    await this.animate('cable_pc_to_adder'); // PC va al sumador
+    // Cable con constante "4" está conectado permanentemente al sumador
+    this.activateComponent('adder_pc4');
+    // El resultado PC+4 se queda en el sumador, no lo enviamos todavía
+    await this.sleep(300);
+    
+    // PASO 3: DECODE - Extraer campos (rs1=base, rs2=dato, offset=inmediato)
+    this.setStatus(`🔍 DECODE: sw x${inst.rs2}, ${inst.imm}(x${inst.rs1})`, 'info');
+    await this.animate('cable_mem_to_a1');
+    await this.animate('cable_mem_to_a2');
+    // Extraer offset para Sign Extend
+    await this.animate('cable_mem_to_order_top');
+    await this.animate('cable_mem_to_order_bottom');
+    await this.sleep(300);
+    
+    // PASO 4: Activar Unidad de Control
+    this.setStatus(`⚙️ Unidad de Control: STORE (MemWrite=1, RegWrite=0)`, 'info');
+    this.activateComponent('control_unit');
+    await this.animate('cable_cu_to_mux_alu_ctrl');
+    await this.animate('cable_cu_to_alu_ctrl'); // Control de operación ALU (ADD para dirección)
+    await this.animate('cable_cu_to_dm_we');
+    await this.sleep(300);
+    
+    // PASO 5: Order & Sign Extend - Extender y reordenar el offset de Store
+    this.setStatus(`📏 Order & Sign Extend: Procesando offset=${inst.imm}`, 'info');
+    this.activateComponent('order_sign_ext');
+    await this.animate('cable_order_to_mux');
+    this.deactivateComponent('order_sign_ext');
+    await this.sleep(300);
+    
+    // PASO 6: READ - Leer registros rs1 (base) y rs2 (dato a guardar)
+    this.setStatus(`📖 READ: Base x${inst.rs1}=${this.registers[inst.rs1]}, Dato x${inst.rs2}=${this.registers[inst.rs2]}`, 'info');
     this.activateComponent('reg_file');
-    await this.animate('w_rs1_dat');
-    await this.animate('w_mux_alu_out');
+    await this.animate('cable_reg_d1_to_mux_alu');
+    await this.animate('cable_reg_d2_to_alu');
+    await this.sleep(300);
     
-    this.activateComponent('alu');
+    // PASO 7: MUX ALU - Seleccionar offset (inmediato)
+    this.setStatus(`🔀 MUX: Seleccionando offset para calcular dirección`, 'info');
+    this.activateComponent('mux_alu');
+    await this.animate('cable_mux_alu_to_alu');
+    this.deactivateComponent('mux_alu');
+    await this.sleep(300);
+    
+    // PASO 8: EXECUTE - Calcular dirección efectiva (base + offset)
     const addr = this.registers[inst.rs1] + inst.imm;
-    await this.animate('w_alu_res');
+    this.setStatus(`🔢 EXECUTE: Dirección efectiva = ${this.registers[inst.rs1]} + ${inst.imm} = ${addr}`, 'info');
+    this.activateComponent('alu');
+    await this.animate('cable_alu_to_dm');
+    await this.sleep(300);
     
-    await this.animate('w_rs2_dat');
-    await this.animate('w_mem_write_data');
+    // PASO 9: Enviar dato a escribir desde rs2
+    this.setStatus(`📤 Enviando dato x${inst.rs2}=${this.registers[inst.rs2]} a memoria`, 'info');
+    await this.animate('cable_mem_di');
+    await this.sleep(300);
     
+    // PASO 10: MEMORY WRITE - Escribir dato en memoria de datos
+    this.setStatus(`💾 MEMORY WRITE: Guardando ${this.registers[inst.rs2]} en dirección [${addr}]`, 'info');
     this.activateComponent('data_mem');
     this.memory[addr] = this.registers[inst.rs2];
+    this.updateMemory(); // Actualizar vista de memoria
+    await this.sleep(300);
     
+    // Highlight memoria modificada
+    document.getElementById(`mem-${addr}`)?.classList.add('highlight');
+    setTimeout(() => {
+      document.getElementById(`mem-${addr}`)?.classList.remove('highlight');
+    }, 1000);
+    
+    // PASO 11: Actualizar PC - MUX selecciona PC+4 y actualiza (NO hay write back en registros)
+    this.setStatus(`✅ Actualizando PC con PC+4 (sin write-back a registros)`, 'info');
+    this.activateComponent('mux_pc');
+    await this.animate('cable_mux_to_adder_right'); // MUX selecciona entrada 0 (PC+4)
+    await this.animate('cable_adder_to_pc'); // Salida del MUX al PC
+    this.deactivateComponent('mux_pc');
+    this.pc += 4;
+    
+    // Cleanup
+    this.deactivateComponent('adder_pc4');
     this.deactivateComponent('data_mem');
     this.deactivateComponent('alu');
     this.deactivateComponent('reg_file');
-    
-    await this.animateDatapath(['w_pc4_loop', 'w_pc_in']);
-    this.pc += 4;
+    this.deactivateComponent('im_mem');
+    this.deactivateComponent('control_unit');
   }
 
   async executeBranch(inst) {
-    await this.animate('w_ctrl_branch');
+    // =============================================
+    // FLUJO PARA INSTRUCCIONES BRANCH (beq, bne, blt, bge, etc)
+    // =============================================
     
-    await this.animate('w_rs1');
-    await this.animate('w_rs2');
+    // PASO 1: FETCH - Leer PC y buscar instrucción en memoria
+    this.setStatus(`📍 FETCH: Leyendo PC=${this.pc}`, 'info');
+    await this.animate('cable_pc_to_mem');
+    this.activateComponent('im_mem');
+    await this.sleep(300);
     
+    // PASO 2: DECODE - Extraer campos (rs1, rs2, offset) desde memoria de instrucciones
+    this.setStatus(`🔍 DECODE: ${inst.op} x${inst.rs1}, x${inst.rs2}, offset=${inst.imm}`, 'info');
+    await this.animate('cable_mem_to_reg_ad'); // Campo rd/ad
+    await this.animate('cable_mem_to_a1'); // rs1
+    await this.animate('cable_mem_to_a2'); // rs2
+    // Extraer campos para Order & Sign Extend
+    await this.animate('cable_mem_to_order_top');
+    await this.animate('cable_mem_to_order_bottom');
+    await this.sleep(300);
+    
+    // PASO 3: Activar Unidad de Control
+    this.setStatus(`⚙️ Unidad de Control: BRANCH (Branch=1, RegWrite=0)`, 'info');
+    this.activateComponent('control_unit');
+    await this.animate('cable_cu_to_mux_branch_ctrl');
+    await this.animate('cable_cu_to_alu_ctrl'); // Control de operación ALU (SUB para comparación)
+    await this.animate('cable_cu_to_and');
+    await this.sleep(300);
+    
+    // PASO 4: Order & Sign Extend - Calcular dirección de branch
+    this.setStatus(`📏 Order & Sign Extend: Calculando offset de salto`, 'info');
+    this.activateComponent('order_sign_ext');
+    await this.animate('cable_order_to_mux');
+    this.deactivateComponent('order_sign_ext');
+    await this.sleep(300);
+    
+    // PASO 5: PC+4 - Calcular siguiente PC (por si no se toma el branch)
+    this.setStatus(`➕ Calculando PC+4 (alternativa si no salta)`, 'info');
+    await this.animate('cable_pc_to_adder'); // PC va al sumador (entrada izquierda)
+    // Cable 6: Constante "4" entra al sumador (entrada derecha)
+    // Nota: Este cable lleva el valor constante 4 al sumador
+    this.activateComponent('adder_pc4');
+    // El resultado PC+4 se queda en el sumador hasta decidir si se usa
+    await this.sleep(300);
+    
+    // PASO 6: READ - Leer registros rs1 y rs2 para comparar
+    this.setStatus(`📖 READ: Comparando x${inst.rs1}=${this.registers[inst.rs1]} vs x${inst.rs2}=${this.registers[inst.rs2]}`, 'info');
     this.activateComponent('reg_file');
-    await this.animate('w_rs1_dat');
-    await this.animate('w_rs2_dat');
+    await this.animate('cable_reg_d1_to_mux_alu');
+    await this.animate('cable_reg_d2_to_alu');
+    await this.sleep(300);
     
-    this.activateComponent('alu');
+    // PASO 7: MUX ALU - Seleccionar rs2 (registro para comparación)
+    this.setStatus(`🔀 MUX ALU: Seleccionando rs2 para comparación`, 'info');
+    this.activateComponent('mux_alu');
+    await this.animate('cable_mux_alu_to_alu');
+    this.deactivateComponent('mux_alu');
+    await this.sleep(300);
+    
+    // PASO 8: EXECUTE - Comparar en la ALU
     const take = this.evaluateBranch(inst.op, this.registers[inst.rs1], this.registers[inst.rs2]);
+    this.setStatus(`🔢 EXECUTE: ${inst.op.toUpperCase()} → Condición: ${take ? 'VERDADERA ✓' : 'FALSA ✗'}`, 'info');
+    this.activateComponent('alu');
+    await this.sleep(300);
     
-    await this.animate('w_zero');
-    this.activateComponent('branch_gates');
-    await this.animate('w_and_out');
+    // PASO 9: Salida de ALU - Cable que lleva el bit de comparación
+    this.setStatus(`📊 Salida ALU: Enviando resultado de comparación`, 'info');
+    await this.animate('cable_mux_branch_to_alu'); // Este cable lleva el resultado de ALU hacia branch logic
+    await this.sleep(300);
     
+    // PASO 10: Lógica de NOT y MUX Branch según tipo de instrucción
+    const usesNot = (inst.op === 'bne');
+    
+    if (usesNot) {
+      // Para BNE: invertir la señal zero con NOT gate
+      this.setStatus(`🔄 NOT Gate: Invirtiendo señal para BNE`, 'info');
+      this.activateComponent('not_gate');
+      await this.animate('cable_not_to_alu'); // Entrada al NOT desde ALU
+      await this.animate('cable_not_to_mux_branch'); // Salida del NOT al MUX
+      this.deactivateComponent('not_gate');
+      await this.sleep(300);
+    }
+    
+    // PASO 11: MUX Branch - Seleccionar señal correcta (normal o invertida)
+    this.setStatus(`🔀 MUX Branch: Seleccionando señal ${usesNot ? 'invertida' : 'directa'}`, 'info');
+    this.activateComponent('mux_branch');
+    await this.animate('cable_mux_branch_to_and');
+    this.deactivateComponent('mux_branch');
+    await this.sleep(300);
+    
+    // PASO 12: AND Gate - Combinar Branch signal con resultado
+    this.setStatus(`🔗 AND Gate: Branch signal=${take}`, 'info');
+    this.activateComponent('and_gate');
+    await this.animate('cable_and_to_mux_ctrl');
+    this.deactivateComponent('and_gate');
+    await this.sleep(300);
+    
+    // PASO 13: MUX PC - Decidir próximo PC
     if (take) {
       const newPC = this.pc + inst.imm;
-      // Detectar bucle infinito hacia sí mismo
+      
+      // Detectar bucle infinito
       if (newPC === this.pc) {
         this.setStatus('⏹️ Bucle infinito detectado - Programa detenido', 'success');
         this.running = false;
-        this.pc = this.instructions.length * 4; // Marcar como finalizado
-        this.deactivateComponent('branch_gates');
+        this.pc = this.instructions.length * 4;
+        this.deactivateComponent('adder_pc4');
         this.deactivateComponent('alu');
         this.deactivateComponent('reg_file');
+        this.deactivateComponent('im_mem');
+        this.deactivateComponent('control_unit');
         return;
       }
+      
+      this.setStatus(`✅ BRANCH TOMADO: PC=${this.pc} → ${newPC}`, 'success');
+      this.activateComponent('mux_pc');
+      await this.animate('cable_mux_to_adder_right'); // Entrada 1 del MUX (offset de branch)
+      await this.animate('cable_adder_to_pc'); // Salida del MUX al PC
+      this.deactivateComponent('mux_pc');
       this.pc = newPC;
     } else {
+      this.setStatus(`➡️ BRANCH NO TOMADO: PC=${this.pc} → ${this.pc + 4}`, 'info');
+      // Cuando NO se toma el branch, usar PC+4 del sumador
+      this.activateComponent('mux_pc');
+      // El cable del sumador (PC+4) ya está encendido desde el PASO 5
+      // Ahora el MUX selecciona entrada 0 (PC+4) y lo pasa al PC
+      await this.animate('cable_mux_to_adder_right'); // Entrada del MUX (PC+4 del sumador)
+      await this.animate('cable_adder_to_pc'); // Salida del MUX va al PC
+      this.deactivateComponent('mux_pc');
       this.pc += 4;
     }
     
-    await this.animate('w_pc_in');
+    await this.sleep(300);
     
-    this.deactivateComponent('branch_gates');
+    // Cleanup
+    this.deactivateComponent('adder_pc4');
     this.deactivateComponent('alu');
     this.deactivateComponent('reg_file');
-  }
-
-  async executeJump(inst) {
-    if (inst.op === 'jalr') {
-      const newPC = (this.registers[inst.rs1] + inst.imm) & ~1; // Clear LSB
-      this.registers[inst.rd] = this.pc + 4;
-      this.registers[0] = 0;
-      this.pc = newPC;
-    } else {
-      this.registers[inst.rd] = this.pc + 4;
-      this.registers[0] = 0;
-      this.pc = this.pc + inst.imm;
-    }
-    await this.animateDatapath(['w_pc_in']);
+    this.deactivateComponent('im_mem');
+    this.deactivateComponent('control_unit');
   }
 
   computeALU(op, a, b) {
@@ -527,10 +857,15 @@ class RISCVSimulator {
     }
   }
 
-  animate(wireId) {
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  animate(cableId) {
     return new Promise(resolve => {
-      const el = document.getElementById(wireId);
+      const el = document.getElementById(cableId);
       if (!el) {
+        console.warn(`Cable no encontrado: ${cableId}`);
         resolve();
         return;
       }
@@ -540,16 +875,16 @@ class RISCVSimulator {
       el.style.strokeDashoffset = len;
       el.getBoundingClientRect();
       
+      el.classList.remove('on');
       el.classList.add('anim');
-      el.style.transition = `stroke-dashoffset ${this.speed * 0.6}ms linear`;
+      el.style.transition = `stroke-dashoffset ${this.speed * 0.4}ms linear`;
       el.style.strokeDashoffset = '0';
       
       setTimeout(() => {
         el.classList.remove('anim');
-        el.style.opacity = "1";
-        el.style.strokeWidth = "4px";
+        el.classList.add('on');
         resolve();
-      }, this.speed * 0.6);
+      }, this.speed * 0.4);
     });
   }
 
@@ -564,9 +899,11 @@ class RISCVSimulator {
   async resetWires() {
     return new Promise(resolve => {
       document.querySelectorAll('.cable').forEach(c => {
-        c.classList.remove('anim');
+        c.classList.remove('anim', 'on');
         c.style.opacity = "0.3";
         c.style.strokeWidth = "3px";
+        c.style.stroke = "#ffc107";
+        c.style.strokeDasharray = "5 5";
       });
       document.querySelectorAll('.component').forEach(c => {
         c.classList.remove('active');
