@@ -11,6 +11,7 @@ class RISCVSimulator {
     this.labels = {};
     this.running = false;
     this.speed = 800;
+    this.currentInstructionType = 'r'; // Tipo de instrucción actual para colores
     
     this.initUI();
     this.updateRegisters();
@@ -297,6 +298,9 @@ class RISCVSimulator {
     // FLUJO PARA INSTRUCCIONES TIPO R (add, sub, and, or, etc)
     // =============================================
     
+    // Establecer tipo de instrucción para colores de cables
+    this.currentInstructionType = 'r';
+    
     // PASO 1: FETCH - Leer PC y buscar instrucción en memoria
     this.setStatus(`📍 FETCH: Leyendo PC=${this.pc}`, 'info');
     await this.animate('cable_pc_to_mem');
@@ -382,6 +386,9 @@ class RISCVSimulator {
     // =============================================
     // FLUJO PARA INSTRUCCIONES TIPO I (addi, andi, ori, etc)
     // =============================================
+    
+    // Establecer tipo de instrucción para colores de cables
+    this.currentInstructionType = 'i';
     
     // PASO 1: FETCH - Leer PC y buscar instrucción en memoria
     this.setStatus(`📍 FETCH: Leyendo PC=${this.pc}`, 'info');
@@ -480,6 +487,9 @@ class RISCVSimulator {
     // =============================================
     // FLUJO PARA INSTRUCCIONES LOAD (lw)
     // =============================================
+    
+    // Establecer tipo de instrucción para colores de cables
+    this.currentInstructionType = 'load';
     
     // PASO 1: FETCH - Leer PC y buscar instrucción en memoria
     this.setStatus(`📍 FETCH: Leyendo PC=${this.pc}`, 'info');
@@ -587,6 +597,9 @@ class RISCVSimulator {
     // FLUJO PARA INSTRUCCIONES STORE (sw)
     // =============================================
     
+    // Establecer tipo de instrucción para colores de cables
+    this.currentInstructionType = 'store';
+    
     // PASO 1: FETCH - Leer PC y buscar instrucción en memoria
     this.setStatus(`📍 FETCH: Leyendo PC=${this.pc}`, 'info');
     await this.animate('cable_pc_to_mem');
@@ -685,6 +698,9 @@ class RISCVSimulator {
     // =============================================
     // FLUJO PARA INSTRUCCIONES BRANCH (beq, bne, blt, bge, etc)
     // =============================================
+    
+    // Establecer tipo de instrucción para colores de cables
+    this.currentInstructionType = 'branch';
     
     // PASO 1: FETCH - Leer PC y buscar instrucción en memoria
     this.setStatus(`📍 FETCH: Leyendo PC=${this.pc}`, 'info');
@@ -875,14 +891,14 @@ class RISCVSimulator {
       el.style.strokeDashoffset = len;
       el.getBoundingClientRect();
       
-      el.classList.remove('on');
-      el.classList.add('anim');
+      el.classList.remove('on', 'type-r', 'type-i', 'type-load', 'type-store', 'type-branch');
+      el.classList.add('anim', `type-${this.currentInstructionType}`);
       el.style.transition = `stroke-dashoffset ${this.speed * 0.4}ms linear`;
       el.style.strokeDashoffset = '0';
       
       setTimeout(() => {
         el.classList.remove('anim');
-        el.classList.add('on');
+        el.classList.add('on', `type-${this.currentInstructionType}`);
         resolve();
       }, this.speed * 0.4);
     });
