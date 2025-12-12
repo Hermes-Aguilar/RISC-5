@@ -616,6 +616,7 @@ class RISCVSimulator {
     
     // PASO 3: DECODE - Extraer campos (rs1=base, rs2=dato, offset=inmediato)
     this.setStatus(`🔍 DECODE: sw x${inst.rs2}, ${inst.imm}(x${inst.rs1})`, 'info');
+    await this.animate('cable_mem_to_reg_ad'); // Campo rd/ad (aunque no se use en store)
     await this.animate('cable_mem_to_a1');
     await this.animate('cable_mem_to_a2');
     // Extraer offset para Sign Extend
