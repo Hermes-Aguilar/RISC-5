@@ -246,6 +246,8 @@ class RISCVSimulator {
     if (!inst) {
       this.setStatus('❌ No hay instrucción en PC=' + this.pc, 'error');
       this.running = false;
+      document.getElementById('btn-step').disabled = true;
+      document.getElementById('btn-run').disabled = true;
       return;
     }
 
@@ -258,11 +260,8 @@ class RISCVSimulator {
     
     this.updateRegisters();
     this.updateMemory();
-
-    if (!this.running) {
-      document.getElementById('btn-step').disabled = true;
-      document.getElementById('btn-run').disabled = true;
-    }
+    
+    // Nota: NO deshabilitamos botones aquí para permitir múltiples pasos
   }
 
   async executeInstruction(inst) {

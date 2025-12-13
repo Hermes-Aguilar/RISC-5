@@ -669,7 +669,98 @@ exit:
       </div>
     </div>
   </div>
+<!-- ============================================ -->
+<!-- AGREGAR ESTE CÓDIGO AL FINAL DEL HTML -->
+<!-- Justo ANTES de </body> -->
+<!-- ============================================ -->
 
+<!-- INSTRUCTIVO DE USO -->
+<div class="instructivo">
+  <h3>📖 Instructivo de Uso</h3>
+  
+  <div class="instructivo-section">
+    <h4>1. Cargar un Programa</h4>
+    <p>Escribe tu código RISC-V en el editor y haz clic en "Cargar Programa". El ensamblador procesará las instrucciones y las mostrará en el panel de programa.</p>
+    <div class="instructivo-code">
+addi x10, x0, 15    # Carga 15 en x10<br>
+add x11, x10, x10   # x11 = x10 + x10
+    </div>
+  </div>
+
+  <div class="instructivo-section">
+    <h4>2. Ejecutar Paso a Paso</h4>
+    <p>Usa el botón "▶️ Paso" para ejecutar una instrucción a la vez. Observa cómo los cables se iluminan con diferentes colores según el tipo de instrucción:</p>
+    <ul>
+      <li>🟢 Verde: Tipo R (add, sub, and, or, xor, sll, srl, sra, slt, sltu)</li>
+      <li>🔵 Cyan: Tipo I (addi, andi, ori, xori, slti, sltiu, slli, srli, srai)</li>
+      <li>🟡 Amarillo: Load (lw)</li>
+      <li>🟠 Naranja: Store (sw)</li>
+      <li>🟣 Magenta: Branch (beq, bne, blt, bge, bltu, bgeu)</li>
+    </ul>
+  </div>
+
+  <div class="instructivo-section">
+    <h4>3. Ejecutar Continuamente</h4>
+    <p>Haz clic en "⏯️ Ejecutar" para correr el programa completo. Puedes pausarlo en cualquier momento haciendo clic nuevamente. Ajusta la velocidad con el slider.</p>
+  </div>
+
+  <div class="instructivo-section">
+    <h4>4. Monitorear Estado</h4>
+    <p>Observa los paneles de la izquierda para ver:</p>
+    <ul>
+      <li>Programa en Memoria: Instrucciones cargadas con resaltado de la actual</li>
+      <li>Banco de Registros: 32 registros (x0-x31) con sus valores actuales</li>
+      <li>Memoria de Datos: Primeras 16 posiciones de memoria</li>
+      <li>Estado: Mensajes detallados de cada paso de ejecución</li>
+    </ul>
+  </div>
+
+  <div class="instructivo-section">
+    <h4>5. Resetear</h4>
+    <p>El botón "🔄 Reset" limpia todos los registros, memoria y reinicia el PC a 0. Útil para volver a ejecutar el programa.</p>
+  </div>
+
+  <div class="instructivo-section">
+    <h4>6. Instrucciones Soportadas</h4>
+    <p>El simulador soporta las siguientes categorías:</p>
+    <ul>
+      <li><strong>Tipo R:</strong> Operaciones registro-registro</li>
+      <li><strong>Tipo I:</strong> Operaciones con inmediatos</li>
+      <li><strong>Load:</strong> Lectura de memoria (lw)</li>
+      <li><strong>Store:</strong> Escritura a memoria (sw)</li>
+      <li><strong>Branch:</strong> Saltos condicionales</li>
+    </ul>
+  </div>
+</div>
+
+<!-- FOOTER DE DERECHOS RESERVADOS -->
+<footer class="footer">
+  <div class="footer-content">
+    <h3>Simulador RISC-V Monociclo</h3>
+    
+    <div class="footer-team">
+      EQUIPO 3: The programmers
+    </div>
+    
+    <div class="footer-contact">
+      <div class="footer-contact-item">
+        Email: auvh050615@gs.utm.mx
+      </div>
+      <div class="footer-contact-item">
+        Universidad: Universidad Tecnologica de la Mixteca
+      </div>
+      <div class="footer-contact-item">
+        Proyecto: Arquitectura de Computadoras
+      </div>
+    </div>
+    
+    <div class="footer-copyright">
+      2025 - Todos los derechos reservados
+    </div>
+  </div>
+</footer>
+
+<!-- FIN DEL CÓDIGO A AGREGAR -->
   <script src="simulador.js"></script>
 </body>
 </html>
